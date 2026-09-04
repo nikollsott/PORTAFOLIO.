@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poke-card</title>
+    <link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+
+
+    <img src="https://i.pinimg.com/originals/11/1d/e1/111de1f8de50af0c4366851a4f0d9fee.gif" class="fondo">
+    <div class="overlay"></div>
+
+    <div class="principal">
+
+
+        <div class="barra">
+            <img src="apk.png" alt="Logo">
+        </div>
+
+
+        <div class="contenedor-cartas">
+
+
+            <div class="carta" onclick="this.classList.toggle('flipped')">
+                <div class="carta-inner">
+
+
+                    <div class="carta-front">
+                        <div class="numero-pokemon" id="numero1"></div>
+                        <br><br>
+                        <h1 id="titulo1"></h1>
+                        <img src="" id="pok1" alt="Imagen Pokémon 1">
+                        <h2><strong>Altura</strong></h2>
+                        <p id="altura1"></p>
+                        <h2><strong>Peso</strong></h2>
+                        <p id="peso1"></p>
+                        <h2><strong>Tipo de criatura</strong></h2>
+                        <div id="tiposContainer" class="tipos-container"></div>
+                    </div>
+
+
+                    <div class="carta-back">
+                        <h2><strong>Habilidades</strong></h2>
+                        <div id="habilidadesBack"></div>
+
+                        <h2><strong>Debilidades</strong></h2>
+                        <div id="debilidadesBack"></div>
+
+                        <h2><strong>Estadísticas</strong></h2>
+                        <div id="estadisticasBack"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+   
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> 
+  <script>
+    function getColorByType(type) {
+      const colors = {
+        fire: '#f08030',
+        water: '#6890f0',
+        grass: '#78c850',
+        electric: '#f8d030',
+        psychic: '#f85888',
+        ice: '#98d8d8',
+        dragon: '#7038f8',
+        fairy: '#ee99ac',
+        dark: '#705848',
+        normal: '#a8a878',
+        fighting: '#c03028',
+        flying: '#a890f0',
+        poison: '#a040a0',
+        ground: '#e0c068',
+        rock: '#b8a038',
+        bug: '#a8b820',
+        ghost: '#705898',
+        steel: '#b8b8d0'
+      };
+      return colors[type] || '#ddd';
+    }
+
+    function getGradientByTypes(types) {
+      const gradientMap = {
+        fire: 'linear-gradient(45deg, #f08030, #ff6f00)',
+        water: 'linear-gradient(45deg, #6890f0, #3060c0)',
+        grass: 'linear-gradient(45deg, #78c850, #4a9022)',
+        electric: 'linear-gradient(45deg, #f8d030, #a05ce5)',
+        psychic: 'linear-gradient(45deg, #f85888, #b03060)',
+        ice: 'linear-gradient(45deg, #98d8d8, #5dbfe0)',
+        dragon: 'linear-gradient(45deg, #7038f8, #301990)',
+        fairy: 'linear-gradient(45deg, #ee99ac, #ffccdd)',
+        dark: 'linear-gradient(45deg, #705848, #3b2f2f)',
+        normal: 'linear-gradient(45deg, #a8a878, #808060)',
+        fighting: 'linear-gradient(45deg, #c03028, #900000)',
+        flying: 'linear-gradient(45deg, #a890f0, #6060d0)',
+        poison: 'linear-gradient(45deg, #a040a0, #700090)',
+        ground: 'linear-gradient(45deg, #e0c068, #c0a020)',
+        rock: 'linear-gradient(45deg, #b8a038, #806010)',
+        bug: 'linear-gradient(45deg, #a8b820, #708010)',
+        ghost: 'linear-gradient(45deg, #705898, #402080)',
+        steel: 'linear-gradient(45deg, #b8b8d0, #8080aa)',
+        'water-electric': 'linear-gradient(45deg, #6890f0, #a05ce5)',
+        'electric-water': 'linear-gradient(45deg, #f8d030, #6890f0)'
+      };
+
+      if (types.length === 1) return gradientMap[types[0]] || '#ddd';
+
+      const comboKey = types.slice().sort().join('-');
+      return gradientMap[comboKey] || `linear-gradient(45deg, ${getColorByType(types[0])}, ${getColorByType(types[1])})`;
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const id1 = Math.floor(Math.random() * 151) + 1;
+      const res1 = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id1}`); 
+
+      const name = res1.data.name;
+      const img = res1.data.sprites.front_default;
+      const height = res1.data.height / 10;
+      const weight = res1.data.weight / 10;
+      const number = res1.data.id;
+
+      document.getElementById("titulo1").textContent = name.charAt(0).toUpperCase() + name.slice(1);
+      document.getElementById("pok1").src = img;
+      document.getElementById("altura1").textContent = `${height} m`;
+      document.getElementById("peso1").textContent = `${weight} kg`;
+      document.getElementById("numero1").textContent = "#" + String(number).padStart(3, '0');
+
+      const tipos = res1.data.types.map(t => t.type.name);
+      const tiposContainer = document.getElementById("tiposContainer");
+      tiposContainer.innerHTML = "";
+
+      tipos.forEach(tipo => {
+        let tag = document.createElement("div");
+        tag.className = "tipo-tag";
+        tag.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+        tag.style.backgroundColor = getColorByType(tipo);
+        tiposContainer.appendChild(tag);
+      });
+
+      const cartaFront = document.querySelector(".carta-front");
+      const cartaBack = document.querySelector(".carta-back");
+      const degradado = getGradientByTypes(tipos);
+
+      cartaFront.style.backgroundImage = degradado;
+      cartaBack.style.backgroundImage = degradado;
+
+      const habilidadesBack = document.getElementById("habilidadesBack");
+            res1.data.abilities.forEach(habilidad => {
+                let button = document.createElement("button");
+                button.className = "habilidad";
+                button.textContent = habilidad.ability.name.toLowerCase();
+                habilidadesBack.appendChild(button);
+            });
+
+
+      const debilidadesBack = document.getElementById("debilidadesBack");
+      debilidadesBack.innerHTML = "";
+      const debilidadesSet = new Set();
+      const tipoUrls = res1.data.types.map(tipo => tipo.type.url);
+
+      for (const url of tipoUrls) {
+        let tipoRes = await axios.get(url);
+        tipoRes.data.damage_relations.double_damage_from.forEach(d => {
+          debilidadesSet.add(d.name);
+        });
+      }
+
+      debilidadesSet.forEach(debilidad => {
+        let button = document.createElement("button");
+        button.className = "debilidad";
+        button.textContent = debilidad.toLowerCase();
+        button.style.backgroundColor = getColorByType(debilidad) || "#aaa";
+        debilidadesBack.appendChild(button);
+      });
+
+      const statsContainer = document.getElementById("estadisticasBack");
+      statsContainer.innerHTML = "";
+      res1.data.stats.forEach(stat => {
+        let contenedor = document.createElement("div");
+        contenedor.style.margin = "10px 0";
+
+        let texto = document.createElement("p");
+        texto.textContent = `${stat.stat.name}: ${stat.base_stat}/400`;
+        texto.style.fontWeight = "bold";
+        texto.style.fontSize = "14px";
+        texto.style.marginBottom = "5px";
+
+        let barra = document.createElement("div");
+        barra.className = "barra-estadistica";
+        barra.style.width = "100%";
+        barra.style.height = "12px";
+        barra.style.borderRadius = "6px";
+        barra.style.overflow = "hidden";
+
+        let progreso = document.createElement("div");
+        progreso.className = "progreso";
+        progreso.style.height = "100%";
+        progreso.style.width = `${(stat.base_stat / 400) * 100}%`;
+        progreso.style.backgroundColor = "#4caf50";
+        progreso.style.transition = "width 0.5s ease";
+
+        barra.appendChild(progreso);
+        contenedor.appendChild(texto);
+        contenedor.appendChild(barra);
+        statsContainer.appendChild(contenedor);
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,269 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+.fondo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2;
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.595);
+    z-index: -1;
+}
+
+
+body {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+
+.principal {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+}
+
+
+.barra {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.barra img {
+    height: 250px;
+}
+
+
+.contenedor-cartas {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+
+.carta {
+    width: 300px;
+    height: 400px;
+    perspective: 1000px;
+    margin: 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.carta-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s ease;
+}
+
+.carta.flipped .carta-inner {
+    transform: rotateY(180deg);
+}
+
+.carta-front,
+.carta-back {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.numero-pokemon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.carta-front {
+    background-color: #ffffff;
+}
+
+.carta-back {
+    background-color: #333;
+    color: #fff;
+    transform: rotateY(180deg);
+    text-align: center;
+}
+
+.carta h1 {
+    font-size: 24px;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.carta h2 {
+    font-size: 16px;
+    margin-top: 10px;
+    color: #222;
+}
+
+.carta p {
+    font-size: 14px;
+    color: #111;
+}
+
+.carta-back p {
+    color: #fff;
+}
+
+.tipos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.tipo-tag {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-transform: capitalize;
+    color: white;
+    background-color: #888;
+}
+
+.carta img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    margin: 15px 0;
+}
+
+
+.habilidad {
+    display: inline-block;
+    margin: 2px;
+    padding: 5px 10px;
+    background-color: #276f2f;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+    text-transform: capitalize;
+    cursor: default;
+    border: none;
+}
+
+
+.debilidad {
+    display: inline-block;
+    margin: 2px;
+    padding: 5px 10px;
+    background-color: #700000;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+    text-transform: capitalize;
+    cursor: default;
+    border: none;
+}
+
+
+.carta-back ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%;
+}
+
+.carta-back li {
+    text-transform: capitalize;
+    margin: 4px 0;
+    color: #ff6b6b;
+    font-size: 14px;
+}
+
+
+.carta-back li::before {
+    content: "•";
+    color: #ff6b6b;
+    margin-right: 8px;
+}
+
+
+#estadisticasBack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#estadisticasBack div {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 10px;
+}
+
+#estadisticasBack p {
+    text-align: left;
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+#estadisticasBack .barra-estadistica {
+    width: 100%;
+    height: 12px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#estadisticasBack .progreso {
+    height: 100%;
+    background-color: #31a334 !important;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    min-width: 5%;
+}
+
+@media (max-width: 783px) {
+.fondo{
+    width: auto;
+    height: 100%;
+}
+
+.overlay{
+ width: 100%;
+height: 100%;   
+}
+
+.barra img{
+    height: 100px;}
+}  

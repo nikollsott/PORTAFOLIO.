@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patitas Felices</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <div class="container py-4">
+    <img src="titulo.png" alt="titulo" class="logo mb-4" />
+    <hr>
+
+    <div class="d-flex justify-content-between mb-3">
+      <input type="text" id="busqueda" class="form-control w-25" placeholder="Buscar por mascota o propietario" />
+
+      <select id="filtroEstado" class="form-select w-auto">
+        <option value="">Todas</option>
+        <option value="Abierta">Abierta</option>
+        <option value="Terminada">Terminada</option>
+        <option value="Anulada">Anulada</option>
+      </select>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registroModal">
+        <strong>Agregar Cita</strong>
+      </button>
+    </div>
+    <div id="contenedorTarjetas" class="row g-4"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="registroModal" tabindex="-1" aria-labelledby="registroModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="registroModalLabel"><strong>Registro Paciente</strong></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formularioCita">
+            <input type="hidden" id="indiceEditar" />
+
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="nombremascota" class="form-label"><strong>Nombre del paciente </strong></label>
+                  <input type="text" class="form-control" id="nombremascota" />
+                  <div class="error-message" id="error-nombremascota"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="tipoMascota" class="form-label"><strong>Tipo de paciente</strong></label>
+                  <select class="form-select" id="tipoMascota">
+                    <option value="">Seleccione...</option>
+                    <option value="Perro">Perro</option>
+                    <option value="Gato">Gato</option>
+                    <option value="Ave">Ave</option>
+                    <option value="Hamster">Hamster</option>
+                    <option value="Tortuga">Tortuga</option>
+                    <option value="Conejo">Conejo</option>
+                    <option value="Cobaya">Cobaya</option>
+                    <option value="Erizo">Erizo</option>
+                    <option value="Hurón">Hurón</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                  <div class="error-message" id="error-tipoMascota"></div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="nombrePropietario" class="form-label"><strong>Nombre del amo</strong></label>
+                  <input type="text" class="form-control" id="nombrePropietario" />
+                  <div class="error-message" id="error-nombrePropietario"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="telefono" class="form-label"><strong>Teléfono</strong></label>
+                  <input type="number" class="form-control" id="telefono" />
+                  <div class="error-message" id="error-telefono"></div>
+                </div>
+              </div>
+            </div>
+            <hr>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="fechaCita" class="form-label"><strong>Fecha de Cita</strong></label>
+                  <input type="date" class="form-control" id="fechaCita" />
+                  <div class="error-message" id="error-fechaCita"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="horaCita" class="form-label"><strong>Hora de Cita</strong></label>
+                  <input type="time" class="form-control" id="horaCita" />
+                  <div class="error-message" id="error-horaCita"></div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="mb-3">
+              <label for="sintomas" class="form-label"><strong>Motivo de consulta</strong></label>
+              <textarea class="form-control" id="sintomas" maxlength="400" rows="3"></textarea>
+              <div class="error-message" id="error-sintomas"></div>
+            </div>
+
+
+            <div class="mb-3">
+              <label for="estado" class="form-label"><strong>Estado</strong></label>
+              <select class="form-select" id="estado">
+                <option value="Abierta">Abierta</option>
+                <option value="Terminada">Terminada</option>
+                <option value="Anulada">Anulada</option>
+              </select>
+            </div>
+
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <strong>Cerrar</strong>
+              </button>
+              <button type="submit" class="btn btn-success">
+                <strong>Guardar</strong>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarEliminarModalLabel">
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <strong>La cita se eliminará permanentemente. ¿Está seguro de que desea
+            continuar?</strong>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-danger" onclick="eliminarConfirmado()">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+
+    let citas = [];
+    const imagenesmascotas = {
+      Perro: "https://png.pngtree.com/png-vector/20231014/ourmid/pngtree-dog-face-png-illustration-png-image_10158271.png",
+      Gato: "https://static.vecteezy.com/system/resources/thumbnails/047/493/988/small_2x/hairy-fluffy-cat-playing-png.png",
+      Ave: "https://static.vecteezy.com/system/resources/previews/022/984/697/non_2x/bird-amazonian-motmot-drawing-feather-free-png.png",
+      Hamster: "https://static.vecteezy.com/system/resources/previews/026/748/774/non_2x/cute-little-hamster-png.png",
+      Tortuga: "https://static.vecteezy.com/system/resources/thumbnails/046/353/622/small/turtle-isolated-on-transparent-background-png.png",
+      Conejo: "https://static.vecteezy.com/system/resources/thumbnails/049/668/304/small_2x/cute-bunny-with-a-transparent-background-adorable-rabbit-image-free-download-high-quality-transparent-pet-animal-png.png",
+      Cobaya: "https://static.vecteezy.com/system/resources/previews/036/083/598/non_2x/ai-generated-bald-guinea-pig-isolated-on-transparent-background-free-png.png",
+      Erizo: "https://static.vecteezy.com/system/resources/previews/049/669/871/non_2x/cute-hedgehog-with-transparent-background-adorable-spiky-mammal-on-a-clear-background-isolated-hedgehog-for-design-projects-hedgehog-clipart-free-downloadable-hedgehog-image-high-resolution-hedgehog-picture-transparent-hedgehog-wildlife-photogr-png.png",
+      Hurón: "https://static.vecteezy.com/system/resources/previews/049/732/118/non_2x/ferret-closeup-of-face-free-png.png",
+      Otro: "https://st2.depositphotos.com/1000938/5198/i/450/depositphotos_51982887-stock-photo-paw-on-puppy.jpg",
+    };
+
+    // Funciones para localStorage
+    function guardarCitasEnStorage() {
+      localStorage.setItem('citasVeterinaria', JSON.stringify(citas));
+    }
+
+    function cargarCitasDesdeStorage() {
+      const citasGuardadas = localStorage.getItem('citasVeterinaria');
+      if (citasGuardadas) {
+        citas = JSON.parse(citasGuardadas);
+      }
+    }
+
+    // Función para formatear fecha y hora
+    function formatearFechaHora(fecha, hora) {
+      const meses = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ];
+
+      const [año, mes, dia] = fecha.split('-');
+      const mesNombre = meses[parseInt(mes) - 1];
+
+      // Convertir hora a formato 12 horas
+      const [horas, minutos] = hora.split(':');
+      let horaFormateada = parseInt(horas);
+      const ampm = horaFormateada >= 12 ? 'pm' : 'am';
+
+      if (horaFormateada === 0) {
+        horaFormateada = 12;
+      } else if (horaFormateada > 12) {
+        horaFormateada = horaFormateada - 12;
+      }
+
+      return `${mesNombre}-${dia}-${año} - ${horaFormateada}:${minutos}${ampm}`;
+    }
+
+    function mostrarError(campo, mensaje) {
+      const input = document.getElementById(campo);
+      const errorDiv = document.getElementById('error-' + campo);
+
+      input.classList.add('is-invalid');
+      errorDiv.textContent = mensaje;
+      errorDiv.style.display = 'block';
+    }
+
+
+    function limpiarError(campo) {
+      const input = document.getElementById(campo);
+      const errorDiv = document.getElementById('error-' + campo);
+
+      input.classList.remove('is-invalid');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+
+
+    function limpiarTodosLosErrores() {
+      const campos = ['nombremascota', 'tipoMascota', 'nombrePropietario', 'telefono', 'fechaCita', 'horaCita', 'sintomas'];
+      campos.forEach(campo => limpiarError(campo));
+    }
+
+
+    function validarNombre(nombre) {
+      limpiarError('nombremascota');
+      if (!nombre.trim()) {
+        mostrarError('nombremascota', 'El nombre de la mascota es obligatorio');
+        return false;
+      }
+      if (nombre.length > 50) {
+        mostrarError('nombremascota', 'El nombre no puede exceder los 50 caracteres');
+        return false;
+      }
+      return true;
+    }
+
+    function validarPropietario(propietario) {
+      limpiarError('nombrePropietario');
+      if (!propietario.trim()) {
+        mostrarError('nombrePropietario', 'El nombre del propietario es obligatorio');
+        return false;
+      }
+      if (propietario.length > 50) {
+        mostrarError('nombrePropietario', 'El nombre del propietario no puede exceder los 50 caracteres');
+        return false;
+      }
+      return true;
+    }
+
+    function validarTelefono(telefono) {
+      limpiarError('telefono');
+      if (!telefono.trim()) {
+        mostrarError('telefono', 'El teléfono es obligatorio');
+        return false;
+      }
+      if (!/^\d{10}$/.test(telefono)) {
+        mostrarError('telefono', 'El teléfono debe tener exactamente 10 dígitos');
+        return false;
+      }
+      return true;
+    }
+
+    function validarTipo(tipo) {
+      limpiarError('tipoMascota');
+      if (!tipo) {
+        mostrarError('tipoMascota', 'Debe seleccionar un tipo de mascota');
+        return false;
+      }
+      return true;
+    }
+
+    function validarFecha(fecha) {
+      limpiarError('fechaCita');
+      if (!fecha) {
+        mostrarError('fechaCita', 'La fecha es obligatoria');
+        return false;
+      }
+
+      const [anio, mes, dia] = fecha.split('-').map(Number);
+      const fechaSeleccionada = new Date(anio, mes - 1, dia);
+      fechaSeleccionada.setHours(0, 0, 0, 0);
+
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const manana = new Date(hoy);
+      manana.setDate(hoy.getDate() + 1);
+
+      if (fechaSeleccionada < manana) {
+        mostrarError('fechaCita', 'La fecha debe ser a partir de mañana. No se permiten fechas anteriores ni la de hoy.');
+        return false;
+      }
+      return true;
+    }
+
+    function validarHora(hora) {
+      limpiarError('horaCita');
+      if (!hora) {
+        mostrarError('horaCita', 'La hora es obligatoria');
+        return false;
+      }
+
+      const [horaCita] = hora.split(':').map(Number);
+      if (horaCita < 8 || horaCita >= 21) {
+        mostrarError('horaCita', 'El horario de atención es de 8:00 AM a 9:00 PM');
+        return false;
+      }
+      return true;
+    }
+
+    function validarSintomas(sintomas) {
+      limpiarError('sintomas');
+      if (!sintomas.trim()) {
+        mostrarError('sintomas', 'Los síntomas son obligatorios');
+        return false;
+      }
+      if (sintomas.length > 400) {
+        mostrarError('sintomas', 'Los síntomas no pueden exceder 400 caracteres');
+        return false;
+      }
+      return true;
+    }
+
+
+    function validarDatos(datos) {
+      let esValido = true;
+
+      if (!validarNombre(datos.nombreMascota)) esValido = false;
+      if (!validarPropietario(datos.nombrePropietario)) esValido = false;
+      if (!validarTelefono(datos.telefono)) esValido = false;
+      if (!validarTipo(datos.tipoMascota)) esValido = false;
+      if (!validarFecha(datos.fechaCita)) esValido = false;
+      if (!validarHora(datos.horaCita)) esValido = false;
+      if (!validarSintomas(datos.sintomas)) esValido = false;
+
+      return esValido;
+    }
+
+    function pintarCards(filtro = "", textoBusqueda = "") {
+      const contenedorTarjetas = document.getElementById("contenedorTarjetas");
+      contenedorTarjetas.innerHTML = "";
+      const filtradas = citas.filter((c) => {
+        if (filtro && c.estado !== filtro) return false;
+        if (
+          textoBusqueda &&
+          !(
+            c.nombreMascota.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
+            c.nombrePropietario.toLowerCase().includes(textoBusqueda.toLowerCase())
+          )
+        )
+          return false;
+        return true;
+      });
+      filtradas.sort(
+        (a, b) =>
+          new Date(a.fechaCita + "T" + a.horaCita) -
+          new Date(b.fechaCita + "T" + b.horaCita)
+      );
+      filtradas.forEach((cita, i) => {
+        const indiceOriginal = citas.indexOf(cita);
+        const card = document.createElement("div");
+        card.className = "col-md-4";
+        card.innerHTML = `
+       <div class="card card-cita shadow-lg border-0 h-100">
+  <div class="card-body d-flex flex-column text-center">
+    <div class="mb-3">
+      <img src="${imagenesmascotas[cita.tipoMascota]}" alt="${cita.tipoMascota}" 
+           class="img-fluid rounded-circle border border-3 border-light shadow mascota-img"/>
+    </div>
+    <h5 class="card-title mb-3">${cita.nombreMascota}</h5>
+    
+    <div class="info-section mb-3 flex-grow-1 text-start">
+      <div class="row g-2 mb-2">
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-user text-primary me-2"></i>
+            <div class="text-nowrap">
+              <span class="fw-semibold">Propietario:</span> ${cita.nombrePropietario}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row g-2 mb-2">
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-phone text-success me-2"></i>
+            <div class="text-nowrap">
+              <span class="fw-semibold">Teléfono:</span> ${cita.telefono}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row g-2 mb-2">
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-calendar-alt text-info me-2"></i>
+            <div class="text-nowrap">
+              <span class="fw-semibold">Fecha:</span> ${formatearFechaHora(cita.fechaCita, cita.horaCita)}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row g-2 mb-2">
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-paw text-warning me-2"></i>
+            <div class="text-nowrap">
+              <span class="fw-semibold">Tipo:</span> ${cita.tipoMascota}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row g-2 mb-3">
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-info-circle me-2 ${cita.estado === 'Abierta' ? 'text-warning' : cita.estado === 'Terminada' ? 'text-success' : 'text-danger'}"></i>
+            <div>
+              <span class="fw-semibold">Estado:</span>
+              <span class="badge ${cita.estado === 'Abierta' ? 'bg-warning text-dark' : cita.estado === 'Terminada' ? 'bg-success' : 'bg-danger'} ms-2">${cita.estado}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="alert alert-danger border-0 shadow-sm mb-3" style="background:  #D32000D0;">
+      <div class="d-flex align-items-center mb-2">
+        <i class="fas fa-exclamation-triangle text-white me-2"></i>
+        <small class="text-white fw-bold mb-0">MOTIVO DE CONSULTA</small>
+      </div>
+      <div class="text-white fw-semibold">${cita.sintomas}</div>
+    </div>
+    
+    <div class="d-flex justify-content-between gap-2 mt-auto">
+      <button class="btn btn-warning btn-sm flex-fill fw-semibold" onclick="editar(${indiceOriginal})">
+        <i class="fas fa-edit me-1"></i>Editar
+      </button>
+      <button class="btn btn-danger btn-sm flex-fill fw-semibold" onclick="prepararEliminar(${indiceOriginal})">
+        <i class="fas fa-trash me-1"></i>Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+      `;
+        contenedorTarjetas.appendChild(card);
+      });
+    }
+
+
+    document.getElementById("formularioCita").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const indice = document.getElementById("indiceEditar").value;
+      const nuevaCita = {
+        nombreMascota: document.getElementById("nombremascota").value,
+        nombrePropietario: document.getElementById("nombrePropietario").value,
+        telefono: document.getElementById("telefono").value,
+        fechaCita: document.getElementById("fechaCita").value,
+        horaCita: document.getElementById("horaCita").value,
+        tipoMascota: document.getElementById("tipoMascota").value,
+        sintomas: document.getElementById("sintomas").value,
+        estado: document.getElementById("estado").value,
+      };
+
+      if (!validarDatos(nuevaCita)) return;
+
+      if (indice !== "") {
+        citas[parseInt(indice)] = nuevaCita;
+      } else {
+        citas.push(nuevaCita);
+      }
+
+      guardarCitasEnStorage(); // Guardar en localStorage
+      pintarCards();
+      this.reset();
+      limpiarTodosLosErrores();
+      document.getElementById("indiceEditar").value = "";
+      bootstrap.Modal.getInstance(document.getElementById("registroModal")).hide();
+    });
+
+    function editar(i) {
+      limpiarTodosLosErrores();
+      const cita = citas[i];
+      document.getElementById("nombremascota").value = cita.nombreMascota;
+      document.getElementById("nombrePropietario").value = cita.nombrePropietario;
+      document.getElementById("telefono").value = cita.telefono;
+      document.getElementById("fechaCita").value = cita.fechaCita;
+      document.getElementById("horaCita").value = cita.horaCita;
+      document.getElementById("tipoMascota").value = cita.tipoMascota;
+      document.getElementById("sintomas").value = cita.sintomas;
+      document.getElementById("estado").value = cita.estado;
+      document.getElementById("indiceEditar").value = i;
+      new bootstrap.Modal(document.getElementById("registroModal")).show();
+    }
+
+    let indexEliminar = null;
+    function prepararEliminar(i) {
+      indexEliminar = i;
+      new bootstrap.Modal(document.getElementById("confirmarEliminarModal")).show();
+    }
+
+    function eliminarConfirmado() {
+      if (indexEliminar !== null) {
+        citas.splice(indexEliminar, 1);
+        guardarCitasEnStorage(); // Guardar en localStorage después de eliminar
+        pintarCards();
+        indexEliminar = null;
+        bootstrap.Modal.getInstance(document.getElementById("confirmarEliminarModal")).hide();
+      }
+    }
+
+    document.getElementById("filtroEstado").addEventListener("change", () => {
+      pintarCards(
+        document.getElementById("filtroEstado").value,
+        document.getElementById("busqueda").value
+      );
+    });
+
+    document.getElementById("busqueda").addEventListener("input", () => {
+      pintarCards(
+        document.getElementById("filtroEstado").value,
+        document.getElementById("busqueda").value
+      );
+    });
+
+
+    document.getElementById("registroModal").addEventListener("show.bs.modal", function () {
+      limpiarTodosLosErrores();
+
+      // Si no hay índice de edición, es una nueva cita - limpiar formulario
+      if (!document.getElementById("indiceEditar").value) {
+        document.getElementById("formularioCita").reset();
+        document.getElementById("indiceEditar").value = "";
+      }
+    });
+
+    // Limpiar formulario cuando se cierre el modal
+    document.getElementById("registroModal").addEventListener("hidden.bs.modal", function () {
+      document.getElementById("formularioCita").reset();
+      document.getElementById("indiceEditar").value = "";
+      limpiarTodosLosErrores();
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Cargar citas al iniciar la página
+      cargarCitasDesdeStorage();
+
+      const fechaInput = document.getElementById('fechaCita');
+      const manana = new Date();
+      manana.setDate(manana.getDate() + 1);
+      fechaInput.min = manana.toISOString().split('T')[0];
+
+      // Pintar las citas cargadas
+      pintarCards();
+    });
+  </script>
+</body>
+
+</html>

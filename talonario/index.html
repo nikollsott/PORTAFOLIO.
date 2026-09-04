@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <title>Talonario</title>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
+
+<template>
+  <div :class="['alert', typeClass, 'alert-dismissible', 'fade', 'show']" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</template>
+
+<script setup>
+  import { computed } from 'vue'
+
+  const props = defineProps({
+    type: {
+      type: String,
+      default: 'success'
+    },
+    message: {
+      type: String,
+      required: true
+    }
+  })
+
+  const typeClass = computed(() => `alert-${props.type}`)
+</script>
+
+<AlertComponent type="success" message="¡Operación exitosa!" />

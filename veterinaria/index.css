@@ -1,0 +1,727 @@
+body {
+  background: linear-gradient(to right, #f8fdfc, #dcecff);
+  font-family: system-ui;
+}
+
+.logo {
+  width: 300px;
+  height: auto;
+}
+
+.btn-success {
+  background-color: #4b8673;
+  border: none;
+  color: white;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-success:hover {
+  background-color: #3e705f;
+  transform: scale(1.03);
+}
+
+.form-select,
+.form-control {
+  border-radius: 0.5rem;
+  border: 1px solid #4b8673;
+}
+
+h5 {
+  color: #000000;
+  font-weight: bold
+}
+
+
+.card-cita {
+  border-radius: 1.5rem;
+  border: none;
+  background: linear-gradient(145deg, #ffffff, #f8fdfc);
+  box-shadow:
+    0 8px 25px rgba(75, 134, 115, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  height: auto;
+  min-height: 480px;
+}
+
+
+.card-cita::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4b8673, #6fa085, #4b8673);
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.card-cita:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 40px rgba(75, 134, 115, 0.15),
+    0 8px 25px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(145deg, #ffffff, #f0f9f6);
+}
+
+.card-body {
+  text-align: left;
+  padding: 0;
+  position: relative;
+}
+
+/* Imagen mascota  */
+.mascota-img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  margin: 0 auto 1.2rem;
+  display: block;
+  border-radius: 50%;
+  border: 5px solid #e8f5f0;
+  box-shadow:
+    0 6px 20px rgba(75, 134, 115, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  background-color: #f0f9f6;
+}
+
+.card-cita:hover .mascota-img {
+  transform: scale(1.05) rotate(5deg);
+  border-color: #b4dcd1;
+  box-shadow:
+    0 8px 25px rgba(75, 134, 115, 0.2),
+    inset 0 1px 3px rgba(255, 255, 255, 0.9);
+}
+
+
+.card-title {
+  text-align: center;
+  color: #2d5a47;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 2px rgba(75, 134, 115, 0.1);
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.card-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4b8673, transparent);
+}
+
+/* Información card  */
+.card-text {
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.7rem;
+}
+
+.card-text strong {
+  color: #2d5a47;
+  font-weight: 600;
+}
+
+/* Contenedor de información iconos  */
+.card-info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding: 0.6rem;
+  background: rgba(75, 134, 115, 0.03);
+  border-radius: 0.8rem;
+  border-left: 3px solid #4b8673;
+  transition: all 0.3s ease;
+}
+
+.card-info-item:hover {
+  background: rgba(75, 134, 115, 0.08);
+  transform: translateX(5px);
+}
+
+.card-info-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 0.8rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4b8673, #6fa085);
+  border-radius: 50%;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.card-info-content {
+  flex: 1;
+}
+
+.card-info-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.card-info-value {
+  font-size: 0.95rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+/* Estilo especial para fecha y hora */
+.card-datetime {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.card-datetime-item {
+  flex: 1;
+  text-align: center;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #e8f5f0, #f0f9f6);
+  border-radius: 1rem;
+  border: 2px solid #e2e8f0;
+}
+
+.card-datetime-label {
+  font-size: 0.7rem;
+  color: #718096;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.5px;
+}
+
+.card-datetime-value {
+  font-size: 1rem;
+  color: #2d5a47;
+  font-weight: 700;
+}
+
+/* Estilo para motivo de consulta */
+.card-motivo {
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  position: relative;
+}
+
+.card-motivo::before {
+  content: '💬';
+  position: absolute;
+  top: -8px;
+  left: 1rem;
+  background: white;
+  padding: 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.card-motivo-label {
+  font-size: 0.75rem;
+  color: #e53e3e;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.card-motivo-text {
+  color: #2d3748;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Separador  */
+.card-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4b8673, transparent);
+  margin: 1.5rem 0;
+  border-radius: 1px;
+}
+
+/* Badge para el estado */
+.badge-estado {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-abierta {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.badge-terminada {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+}
+
+.badge-anulada {
+  background: linear-gradient(135deg, #f56565, #e53e3e);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 101, 101, 0.3);
+}
+
+/* Botones con iconos y mejor espaciado */
+.card-cita .btn-group {
+  width: 100%;
+  margin-top: 1.5rem;
+  gap: 0.8rem;
+  display: flex;
+}
+
+.card-cita .btn-sm {
+  flex: 1;
+  padding: 0.8rem 1.2rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.card-cita .btn-sm::before {
+  font-size: 1rem;
+}
+
+.btn-editar::before {
+  content: '✏️';
+}
+
+.btn-eliminar::before {
+  content: '🗑️';
+}
+
+/* Botón Editar */
+.btn-warning.btn-sm,
+.btn-editar {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-warning.btn-sm:hover,
+.btn-editar:hover {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
+
+/* Botón Eliminar */
+.btn-danger.btn-sm,
+.btn-eliminar {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  color: white;
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.btn-danger.btn-sm:hover,
+.btn-eliminar:hover {
+  background: linear-gradient(135deg, #c53030, #9c2626);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+}
+
+
+.card-info-extra {
+  background: rgba(75, 134, 115, 0.05);
+  border-radius: 0.8rem;
+  padding: 0.8rem;
+  margin: 1rem 0;
+  border-left: 4px solid #4b8673;
+}
+
+.card-info-extra .card-text {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-cita {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+
+.card-cita[data-estado="Abierta"] {
+  border-left: 5px solid #48bb78;
+}
+
+.card-cita[data-estado="Terminada"] {
+  border-left: 5px solid #4299e1;
+}
+
+.card-cita[data-estado="Anulada"] {
+  border-left: 5px solid #f56565;
+  opacity: 0.8;
+}
+
+
+
+hr {
+  border: 2px solid #4b8673;
+  margin: 20px 0;
+}
+
+.container {
+  max-width: 1200px;
+}
+
+.error-message {
+  color: #8c0000;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  display: none;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: #8c0000;
+}
+
+.invalid-feedback {
+  display: block;
+  color: #8c0000;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.modal-header {
+  background-color: #a6d5c6;
+  color: white;
+}
+
+.btn-close-white {
+  filter: invert(1);
+}
+
+
+@media (max-width: 575.98px) {
+  .container {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .d-flex.justify-content-between>* {
+    width: 100% !important;
+  }
+
+  .col-md-4 {
+    margin-bottom: 1rem;
+  }
+
+
+  .card-cita {
+    padding: 1.2rem;
+    min-height: 420px;
+  }
+
+  .mascota-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .card-text {
+    font-size: 0.9rem;
+  }
+
+  .card-cita .btn-sm {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .card-datetime {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .row.g-3 {
+    gap: 0.5rem;
+  }
+
+  .col-md-6 {
+    margin-bottom: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .d-flex.justify-content-between .btn-sm {
+    flex: 1;
+    margin: 0 0.25rem;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .d-flex.justify-content-between {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .d-flex.justify-content-between>input[type="text"] {
+    width: 100% !important;
+    order: 1;
+  }
+
+  .d-flex.justify-content-between>select {
+    width: 45% !important;
+    order: 2;
+  }
+
+  .d-flex.justify-content-between>button {
+    width: 45% !important;
+    order: 3;
+  }
+
+
+  .mascota-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .modal-dialog {
+    max-width: 500px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .container {
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .d-flex.justify-content-between>input[type="text"] {
+    width: 40% !important;
+  }
+
+  .d-flex.justify-content-between>select {
+    width: 25% !important;
+  }
+
+  .d-flex.justify-content-between>button {
+    width: 30% !important;
+  }
+
+  .card-cita {
+    padding: 1.2rem;
+  }
+
+  .mascota-img {
+    width: 130px;
+    height: 130px;
+  }
+
+  .modal-dialog {
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .container {
+    padding: 2.5rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+
+  .card-cita {
+    padding: 2rem;
+    min-height: 500px;
+  }
+
+  .mascota-img {
+    width: 140px;
+    height: 140px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .modal-dialog {
+    max-width: 700px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    padding: 3rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .card-cita {
+    padding: 1.8rem;
+  }
+
+  .mascota-img {
+    width: 140px;
+    height: 140px;
+  }
+
+  .modal-dialog {
+    max-width: 800px;
+  }
+}
+
+.text-responsive {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.py-responsive {
+  padding-top: clamp(1rem, 3vw, 2rem);
+  padding-bottom: clamp(1rem, 3vw, 2rem);
+}
+
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(75, 134, 115, 0.25);
+  border-color: #4b8673;
+}
+
+.error-message {
+  font-weight: 500;
+}
+
+@media (hover: hover) {
+  .card-cita:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow:
+      0 20px 40px rgba(75, 134, 115, 0.15),
+      0 8px 25px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-success:hover {
+    transform: scale(1.03);
+  }
+}
+
+
+@media (hover: none) and (pointer: coarse) {
+  .card-cita:hover {
+    transform: none;
+  }
+
+  .card-cita:active {
+    transform: scale(0.98);
+  }
+
+  .btn-success:hover {
+    transform: none;
+  }
+}
+
+@media print {
+
+  .btn,
+  .modal,
+  .d-flex.justify-content-between {
+    display: none !important;
+  }
+
+  .card-cita {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+
+  body {
+    background: white !important;
+  }
+}

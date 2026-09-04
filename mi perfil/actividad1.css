@@ -1,0 +1,88 @@
+body {
+    padding: 2px;
+
+    display: flex;
+    justify-content: center;
+    font-family: Arial}
+
+h1 {
+    background-color: #2c2c2c;
+    padding: 30px;
+    margin: 0;
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+
+.container {
+    border: 50px;
+    padding-bottom: 200px;
+    background-color: #e6e6e6;
+    width: 50%;
+}
+
+.perfil {
+    padding: 50px;
+    background-color: white;
+    margin: 30px;
+    border-radius: 10px;
+}
+
+img {
+    border-radius: 60%;
+    border: 3px solid rgb(36, 36, 36);
+    width: 120px;
+    height: 130px;
+    margin: auto;
+    display: block;
+}
+
+h2 {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+    font-size: 85%;
+    font-weight: normal;
+    color: #737373
+}
+
+ul {
+    font-size: 95%;
+    color: #646464
+}
+
+h4{
+    font-size: 108%;
+    color: #646464
+
+
+}
+
+.redes h5{
+    font-size: 108%;
+    font-weight: normal;
+    text-align: center;
+    color: #000000
+}
+
+button {
+    border-radius: 5px;
+    background-color: #2c2c2c;
+    color: white;
+    width: 105px;
+    height: 40px;
+    display: block;
+    margin: 0 auto;
+    border:none
+}
+
+.redes-nombres {
+    text-align: center;
+    word-spacing: 20px;}
+    
+   
+
+
