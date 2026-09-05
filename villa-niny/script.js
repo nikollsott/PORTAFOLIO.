@@ -13,10 +13,10 @@
 
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /** Elementos que pueden recibir foco dentro de un contenedor (para el focus trap). */
+ 
   var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-  /** Bloquea/desbloquea el scroll del documento sin provocar saltos. */
+
   var scrollLock = (function () {
     var locks = 0;
     return {
@@ -156,21 +156,10 @@
   })();
 
 
-  /* ========================================================================
-     04b. CONTROLES DE VIDRIO (selector de huéspedes y de fechas)
-     --------------------------------------------------------------------
-     Mejora progresiva: el <select> y los <input type="date"> del formulario
-     de reserva siguen siendo la fuente de verdad (valor, min, max, change).
-     Aquí se ocultan y se coloca encima un control propio con la estética del
-     sitio, porque el desplegable y el calendario nativos no son estilizables.
-     Sin JavaScript el formulario conserva los controles nativos.
 
-     Los paneles flotantes se montan en <body> con position:fixed para que el
-     desbordamiento del modal no los recorte.
-     ======================================================================== */
   var glass = (function () {
     var secuencia = 0;
-    var activo = null;                 // panel abierto actualmente
+    var activo = null;               
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var DIAS = ['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do'];
 
