@@ -13,10 +13,10 @@
 
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
- 
+  /** Elementos que pueden recibir foco dentro de un contenedor (para el focus trap). */
   var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-
+  /** Bloquea/desbloquea el scroll del documento sin provocar saltos. */
   var scrollLock = (function () {
     var locks = 0;
     return {
@@ -156,10 +156,21 @@
   })();
 
 
+  /* ========================================================================
+     04b. CONTROLES DE VIDRIO (selector de huéspedes y de fechas)
+     --------------------------------------------------------------------
+     Mejora progresiva: el <select> y los <input type="date"> del formulario
+     de reserva siguen siendo la fuente de verdad (valor, min, max, change).
+     Aquí se ocultan y se coloca encima un control propio con la estética del
+     sitio, porque el desplegable y el calendario nativos no son estilizables.
+     Sin JavaScript el formulario conserva los controles nativos.
 
+     Los paneles flotantes se montan en <body> con position:fixed para que el
+     desbordamiento del modal no los recorte.
+     ======================================================================== */
   var glass = (function () {
     var secuencia = 0;
-    var activo = null;               
+    var activo = null;                 // panel abierto actualmente
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var DIAS = ['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do'];
 
@@ -673,6 +684,14 @@
     };
   })();
 
+
+  /* ========================================================================
+     05. MODAL "VERIFICAR DISPONIBILIDAD"
+     --------------------------------------------------------------------
+     Los enlaces marcados con [data-reserva] conservan su href original a
+     WhatsApp (funcionan sin JavaScript). Con JS activo abren el modal, que
+     compone un mensaje ya redactado con las fechas y el número de huéspedes.
+     ======================================================================== */
   (function initReserva() {
     var modal      = $('#reservaModal');
     var form       = $('#reservaForm');
@@ -686,12 +705,13 @@
 
     var ultimoFoco = null;
 
- 
+    // Límites del selector de fechas: nunca fechas pasadas
     var min = hoyISO(0);
     var max = hoyISO(CONFIG.maxDiasAnticipacion);
     inEntrada.min = min; inEntrada.max = max;
     inSalida.min  = min; inSalida.max  = max;
 
+    // Controles propios (calendario y lista de huéspedes) sobre los nativos
     glass.fecha(inEntrada, 'i-calendar', 'Selecciona fecha');
     glass.fecha(inSalida, 'i-calendar', 'Selecciona fecha');
     glass.select(inHuesp, 'i-users');
@@ -704,7 +724,7 @@
     }
 
     function mostrarError(mensaje, campo) {
-      errorText.textContent = mensaje;         
+      errorText.textContent = mensaje;          // textContent: nunca innerHTML
       errorBox.hidden = false;
       if (campo) { campo.setAttribute('aria-invalid', 'true'); glass.focus(campo); }
     }
@@ -743,13 +763,14 @@
       else if (e.key === 'Tab') trapFocus(modal, e);
     });
 
-
+    // La salida nunca puede ser anterior a la llegada
     inEntrada.addEventListener('change', function () {
       limpiarError();
       if (inEntrada.value) {
         inSalida.min = inEntrada.value;
         if (inSalida.value && inSalida.value <= inEntrada.value) {
           inSalida.value = '';
+          // notifica el cambio para que el control de vidrio repinte su valor
           inSalida.dispatchEvent(new Event('change'));
         }
       }
@@ -782,21 +803,32 @@
         txtHuespedes = huespedes + (huespedes === 1 ? ' huésped' : ' huéspedes');
       }
 
+      // --- Composición del mensaje -----------------------------------
       var mensaje =
         '¡Hola! Quisiera consultar disponibilidad y tarifa del ' + formatearFecha(entrada) +
         ' al ' + formatearFecha(salida) +
         ' para ' + txtHuespedes + '. ¡Gracias!';
 
+      // URL construida con valores codificados; el teléfono es una constante local
       var url = 'https://api.whatsapp.com/send/?phone=' + encodeURIComponent(CONFIG.whatsappPhone) +
                 '&text=' + encodeURIComponent(mensaje) +
                 '&type=phone_number&app_absent=0';
 
+      // noopener/noreferrer: evita que la pestaña destino acceda a window.opener
       window.open(url, '_blank', 'noopener,noreferrer');
       cerrar();
     });
   })();
 
 
+  /* ========================================================================
+     06. CARRUSEL DE HABITACIONES
+     --------------------------------------------------------------------
+     Avance automático lento con control manual. El desplazamiento nativo
+     (scroll-snap) permite el gesto táctil; aquí sólo se añaden el temporizador,
+     las flechas, los puntos y el contador, que se generan desde el DOM.
+     Para añadir una habitación basta con duplicar un <li class="carousel-slide">.
+     ======================================================================== */
   (function initCarrusel() {
     var carrusel = $('#roomCarousel');
     if (!carrusel) return;
