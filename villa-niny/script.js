@@ -1,30 +1,11 @@
-/* ==========================================================================
-   VILLA NINY · Hospedaje Campestre
-   JavaScript de interfaz (vanilla, sin dependencias)
-   --------------------------------------------------------------------------
-   Módulos
-   01. Configuración y utilidades
-   02. Header: estado al hacer scroll
-   03. Navegación móvil
-   04. Scrollspy (enlace activo)
-   04b. Controles de vidrio (selector de huéspedes y de fechas)
-   05. Modal "Consultar disponibilidad y tarifa" -> mensaje de WhatsApp
-   06. Carrusel de habitaciones
-   07. Lightbox de fotografías
-   08. Animaciones de entrada (IntersectionObserver)
-   ========================================================================== */
+
 (function () {
   'use strict';
 
-  /* ========================================================================
-     01. CONFIGURACIÓN Y UTILIDADES
-     ======================================================================== */
-
-  /** Datos de contacto. Único punto de edición del número de WhatsApp. */
   var CONFIG = {
-    whatsappPhone: '573107309933',      // sólo dígitos, formato internacional
+    whatsappPhone: '573107309933',
     maxHuespedes: 12,
-    maxDiasAnticipacion: 730            // 2 años: límite razonable del selector
+    maxDiasAnticipacion: 730          
   };
 
   var $  = function (sel, ctx) { return (ctx || document).querySelector(sel); };
@@ -63,7 +44,7 @@
     }
   }
 
-  /** Formatea 'YYYY-MM-DD' a texto legible en español, sin depender de la zona horaria. */
+
   function formatearFecha(iso) {
     var partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
     if (!partes) return '';
@@ -75,7 +56,6 @@
     }
   }
 
-  /** Devuelve la fecha de hoy como 'YYYY-MM-DD' en hora local. */
   function hoyISO(offsetDias) {
     var d = new Date();
     d.setDate(d.getDate() + (offsetDias || 0));
@@ -85,9 +65,6 @@
   }
 
 
-  /* ========================================================================
-     02. HEADER: ESTADO AL HACER SCROLL
-     ======================================================================== */
   (function initHeader() {
     var header = $('#siteHeader');
     if (!header) return;
@@ -104,9 +81,6 @@
   })();
 
 
-  /* ========================================================================
-     03. NAVEGACIÓN MÓVIL
-     ======================================================================== */
   (function initNav() {
     var toggle   = $('#navToggle');
     var nav      = $('#siteNav');
@@ -136,19 +110,17 @@
     toggle.addEventListener('click', function () { estaAbierto() ? cerrar() : abrir(); });
     backdrop.addEventListener('click', cerrar);
 
-    // Cerrar al navegar a una sección
+
     $$('.nav-link, .nav-cta', nav).forEach(function (link) {
       link.addEventListener('click', function () { if (estaAbierto()) cerrar(); });
     });
 
-    // Cerrar con Escape y mantener el foco dentro del panel
     document.addEventListener('keydown', function (e) {
       if (!estaAbierto()) return;
       if (e.key === 'Escape') { cerrar(); toggle.focus(); }
       else if (e.key === 'Tab') { trapFocus(nav, e); }
     });
 
-    // Si se vuelve a escritorio con el menú abierto, restablecer el estado
     window.matchMedia('(min-width: 901px)').addEventListener('change', function (e) {
       if (e.matches && estaAbierto()) cerrar();
     });
@@ -712,14 +684,6 @@
     };
   })();
 
-
-  /* ========================================================================
-     05. MODAL "VERIFICAR DISPONIBILIDAD"
-     --------------------------------------------------------------------
-     Los enlaces marcados con [data-reserva] conservan su href original a
-     WhatsApp (funcionan sin JavaScript). Con JS activo abren el modal, que
-     compone un mensaje ya redactado con las fechas y el número de huéspedes.
-     ======================================================================== */
   (function initReserva() {
     var modal      = $('#reservaModal');
     var form       = $('#reservaForm');
@@ -733,13 +697,12 @@
 
     var ultimoFoco = null;
 
-    // Límites del selector de fechas: nunca fechas pasadas
+ 
     var min = hoyISO(0);
     var max = hoyISO(CONFIG.maxDiasAnticipacion);
     inEntrada.min = min; inEntrada.max = max;
     inSalida.min  = min; inSalida.max  = max;
 
-    // Controles propios (calendario y lista de huéspedes) sobre los nativos
     glass.fecha(inEntrada, 'i-calendar', 'Selecciona fecha');
     glass.fecha(inSalida, 'i-calendar', 'Selecciona fecha');
     glass.select(inHuesp, 'i-users');
@@ -752,7 +715,7 @@
     }
 
     function mostrarError(mensaje, campo) {
-      errorText.textContent = mensaje;          // textContent: nunca innerHTML
+      errorText.textContent = mensaje;         
       errorBox.hidden = false;
       if (campo) { campo.setAttribute('aria-invalid', 'true'); glass.focus(campo); }
     }
@@ -791,14 +754,13 @@
       else if (e.key === 'Tab') trapFocus(modal, e);
     });
 
-    // La salida nunca puede ser anterior a la llegada
+
     inEntrada.addEventListener('change', function () {
       limpiarError();
       if (inEntrada.value) {
         inSalida.min = inEntrada.value;
         if (inSalida.value && inSalida.value <= inEntrada.value) {
           inSalida.value = '';
-          // notifica el cambio para que el control de vidrio repinte su valor
           inSalida.dispatchEvent(new Event('change'));
         }
       }
@@ -818,37 +780,34 @@
       if (entrada < min) { return mostrarError('La fecha de llegada no puede estar en el pasado.', inEntrada); }
       if (salida <= entrada) { return mostrarError('La fecha de salida debe ser posterior a la de llegada.', inSalida); }
 
-      // El número de huéspedes se acota al rango permitido
-      var huespedes = parseInt(inHuesp.value, 10);
-      if (!isFinite(huespedes) || huespedes < 1) huespedes = 1;
-      if (huespedes > CONFIG.maxHuespedes) huespedes = CONFIG.maxHuespedes;
+      // --- Validación y formato de huéspedes -------------------------
+      var huespedesVal = inHuesp.value;
+      var txtHuespedes = '';
+      
+      if (huespedesVal === '12+') {
+        txtHuespedes = 'más de 12 huéspedes';
+      } else {
+        var huespedes = parseInt(huespedesVal, 10);
+        if (!isFinite(huespedes) || huespedes < 1) huespedes = 1;
+        if (huespedes > CONFIG.maxHuespedes) huespedes = CONFIG.maxHuespedes;
+        txtHuespedes = huespedes + (huespedes === 1 ? ' huésped' : ' huéspedes');
+      }
 
-      // --- Composición del mensaje -----------------------------------
       var mensaje =
         '¡Hola! Quisiera consultar disponibilidad y tarifa del ' + formatearFecha(entrada) +
         ' al ' + formatearFecha(salida) +
-        ' para ' + huespedes + (huespedes === 1 ? ' huésped' : ' huéspedes') + '. ¡Gracias!';
+        ' para ' + txtHuespedes + '. ¡Gracias!';
 
-      // URL construida con valores codificados; el teléfono es una constante local
       var url = 'https://api.whatsapp.com/send/?phone=' + encodeURIComponent(CONFIG.whatsappPhone) +
                 '&text=' + encodeURIComponent(mensaje) +
                 '&type=phone_number&app_absent=0';
 
-      // noopener/noreferrer: evita que la pestaña destino acceda a window.opener
       window.open(url, '_blank', 'noopener,noreferrer');
       cerrar();
     });
   })();
 
 
-  /* ========================================================================
-     06. CARRUSEL DE HABITACIONES
-     --------------------------------------------------------------------
-     Avance automático lento con control manual. El desplazamiento nativo
-     (scroll-snap) permite el gesto táctil; aquí sólo se añaden el temporizador,
-     las flechas, los puntos y el contador, que se generan desde el DOM.
-     Para añadir una habitación basta con duplicar un <li class="carousel-slide">.
-     ======================================================================== */
   (function initCarrusel() {
     var carrusel = $('#roomCarousel');
     if (!carrusel) return;
