@@ -1,31 +1,8 @@
-/* ==========================================================================
-   VILLA NINY · Hospedaje Campestre
-   Hoja de estilos principal
-   --------------------------------------------------------------------------
-   Índice
-   01. Tokens de diseño (variables)
-   02. Reset y base
-   03. Utilidades y tipografía
-   04. Componentes: botones, fotos, iconos
-   05. Header y navegación
-   06. Hero
-   07. Secciones de contenido
-   07b. Carrusel de habitaciones
-   08. Footer
-   09. Modal de reserva
-   10. Lightbox
-   11. Microinteracciones y animaciones
-   12. Responsive
-   ========================================================================== */
 
-
-/* ==========================================================================
-   01. TOKENS DE DISEÑO
-   ========================================================================== */
 :root {
   /* --- Color: verdes de bosque --- */
   --forest-900: #022F16;
-  --forest-800: #03441F;   /* verde base del mockup */
+  --forest-800: #03441F;  
   --forest-700: #0B5B2C;
   --forest-600: #157A3D;
   --forest-line: rgba(243, 236, 224, .16);
@@ -497,33 +474,38 @@ button { font: inherit; color: inherit; }
   position: relative;
   isolation: isolate;
   background: var(--forest-800);
-  padding-top: calc(var(--header-h) + clamp(2rem, 1rem + 4vw, 4.5rem));
-  padding-bottom: clamp(3rem, 2rem + 4vw, 5.5rem);
+  min-height: 92vh;
+  display: grid;
+  align-items: center;
+  padding-block: calc(var(--header-h) + 3rem) 5rem;
   overflow: hidden;
 }
 
-/* Imagen de fondo: sólo visible en pantallas pequeñas */
-.hero-media { display: none; }
-
-/* Halo suave para dar profundidad al verde */
-.hero::before {
+/* Imagen de fondo a sangre para todas las pantallas */
+.hero-media {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-media::after {
   content: "";
   position: absolute;
-  z-index: -1;
-  top: -30%;
-  right: -10%;
-  width: 60vw;
-  height: 60vw;
-  max-width: 780px;
-  max-height: 780px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(21, 122, 61, .38) 0%, rgba(3, 68, 31, 0) 68%);
-  pointer-events: none;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(2, 34, 16, .92) 0%, rgba(3, 68, 31, .84) 45%, rgba(2, 34, 16, .95) 100%);
 }
+
+/* El halo decorativo se oculta ya que la foto cubre el fondo */
+.hero::before { display: none; }
 
 .hero-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   align-items: center;
   gap: clamp(2rem, 1rem + 3vw, 4.5rem);
 }
@@ -559,27 +541,21 @@ button { font: inherit; color: inherit; }
   line-height: 1.5;
 }
 
-.hero-photo { position: relative; margin: 0; }
-.hero-photo .photo { aspect-ratio: 4 / 3.05; }
-
-.rnt-badge {
-  position: absolute;
-  left: -14px;
-  bottom: -16px;
+/* La insignia RNT se alinea con los botones */
+.hero-actions::after {
+  content: "RNT 83494";
   display: inline-flex;
   align-items: center;
-  gap: .45rem;
+  align-self: center;
   padding: .6rem 1.05rem;
+  border: 1px solid rgba(243, 236, 224, .3);
   border-radius: var(--r-pill);
-  background: var(--linen);
-  color: var(--wood);
+  color: var(--gold-soft);
   font-size: .68rem;
   font-weight: 600;
   letter-spacing: .18em;
   text-transform: uppercase;
-  box-shadow: var(--sh-3);
 }
-.rnt-badge .ico { width: .95rem; height: .95rem; color: var(--forest-700); }
 
 .scroll-cue {
   position: absolute;
@@ -602,10 +578,6 @@ button { font: inherit; color: inherit; }
   50%      { transform: translateY(4px);  opacity: 1; }
 }
 
-
-/* ==========================================================================
-   07. SECCIONES DE CONTENIDO
-   ========================================================================== */
 
 /* --- Tríada (I / II / III) --- */
 .triad { padding-top: clamp(2.5rem, 1.5rem + 3vw, 4rem); }
@@ -746,13 +718,6 @@ button { font: inherit; color: inherit; }
 .section-gallery { padding-top: 0; }
 
 
-/* ==========================================================================
-   07b. CARRUSEL DE HABITACIONES
-   --------------------------------------------------------------------------
-   El viewport es un contenedor con scroll horizontal y scroll-snap: el gesto
-   táctil funciona de forma nativa y, sin JavaScript, sigue siendo una galería
-   desplazable. El JS sólo añade el avance automático y los controles.
-   ========================================================================== */
 .carousel { position: relative; }
 
 .carousel-viewport {
@@ -874,9 +839,7 @@ button { font: inherit; color: inherit; }
   .carousel-next { right: 8px; }
 }
 
-/* ==========================================================================
-   08. FOOTER
-   ========================================================================== */
+
 .site-footer {
   padding-block: clamp(3.5rem, 2.5rem + 3vw, 5.5rem) var(--sp-6);
   background: var(--forest-800);
@@ -1084,16 +1047,7 @@ button { font: inherit; color: inherit; }
 .form-note a { color: var(--gold-600); text-decoration: underline; text-underline-offset: 3px; }
 
 
-/* ==========================================================================
-   09b. CONTROLES DE VIDRIO (huéspedes y fechas del formulario de reserva)
-   --------------------------------------------------------------------------
-   El <select> y los <input type="date"> nativos siguen siendo la fuente de
-   verdad: JavaScript los oculta (.gc-native) y coloca encima un control
-   propio. Sin JavaScript no se aplica ninguna de estas reglas y el
-   formulario conserva sus controles nativos, ya estilizados más arriba.
-   ========================================================================== */
 
-/* --- Envoltura y control nativo oculto --- */
 .gc { position: relative; display: block; }
 .gc-native { display: none; }
 
@@ -1400,13 +1354,6 @@ button { font: inherit; color: inherit; }
 .amen-grid .reveal:nth-child(6)   { transition-delay: 400ms; }
 
 
-/* ==========================================================================
-   12. RESPONSIVE
-   --------------------------------------------------------------------------
-   Estrategia: primero se reaprovecha el ancho disponible (rejillas fluidas
-   con auto-fit y clamp). Sólo se apila en vertical cuando el contenido
-   deja de ser legible.
-   ========================================================================== */
 
 /* --- Laptop / tablet horizontal --- */
 @media (max-width: 1080px) {
@@ -1449,47 +1396,6 @@ button { font: inherit; color: inherit; }
   .nav-cta { width: 100%; }
 
   .nav-toggle { display: block; z-index: 96; }
-
-  /* Hero: fotografía a sangre con velo verde */
-  .hero {
-    min-height: 92vh;
-    display: grid;
-    align-items: center;
-    padding-block: calc(var(--header-h) + 3rem) 5rem;
-  }
-  .hero-media {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-  }
-  .hero-media img { width: 100%; height: 100%; object-fit: cover; }
-  .hero-media::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(2, 34, 16, .92) 0%, rgba(3, 68, 31, .84) 45%, rgba(2, 34, 16, .95) 100%);
-  }
-  .hero::before { display: none; }
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-copy  { max-width: 40rem; }
-  .hero-photo { display: none; }
-
-  /* La insignia RNT se conserva junto a los botones */
-  .hero-actions::after {
-    content: "RNT 83494";
-    display: inline-flex;
-    align-items: center;
-    align-self: center;
-    padding: .6rem 1.05rem;
-    border: 1px solid rgba(243, 236, 224, .3);
-    border-radius: var(--r-pill);
-    color: var(--gold-soft);
-    font-size: .68rem;
-    font-weight: 600;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-  }
 
   /* Bloques divididos: en tablet se apilan pero la foto conserva protagonismo */
   .split-grid { grid-template-columns: 1fr; gap: var(--sp-6); }
