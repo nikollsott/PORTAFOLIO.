@@ -839,6 +839,51 @@ button { font: inherit; color: inherit; }
   .carousel-next { right: 8px; }
 }
 
+/* ==========================================================================
+   07c. TESTIMONIOS
+   ========================================================================== */
+.testimonial-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  border: 1px solid var(--border);
+  transition: box-shadow var(--t-base), transform var(--t-base);
+}
+.testimonial-card:hover {
+  box-shadow: var(--sh-2);
+  transform: translateY(-4px);
+}
+.testimonial-card .stars {
+  color: var(--gold);
+  font-size: 1.15rem;
+  letter-spacing: 0.15em;
+}
+.testimonial-card blockquote {
+  margin: 0;
+  font-style: italic;
+  color: var(--bark);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.testimonial-card .author {
+  margin-top: auto;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--wood);
+}
+.testimonial-card .author span {
+  display: block;
+  font-weight: 400;
+  color: var(--muted-soft);
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+
 
 .site-footer {
   padding-block: clamp(3.5rem, 2.5rem + 3vw, 5.5rem) var(--sp-6);
