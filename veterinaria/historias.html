@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patitas Sanas · Historias clínicas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Iconos (sprite SVG) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-paw" viewBox="0 0 24 24">
+      <circle cx="5.5" cy="11" r="2" /><circle cx="9.5" cy="6.5" r="2" /><circle cx="14.5" cy="6.5" r="2" /><circle cx="18.5" cy="11" r="2" />
+      <path d="M12 12.5c-3 0-5.5 3-5.5 5.2 0 1.6 1.4 2.3 2.8 2.3 1 0 1.8-.5 2.7-.5s1.7.5 2.7.5c1.4 0 2.8-.7 2.8-2.3 0-2.2-2.5-5.2-5.5-5.2z" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></symbol>
+  </svg>
+
+  <!-- Cabecera -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <img src="titulo.png" alt="Patitas Sanas" class="logo" />
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="index.html">Citas</a>
+        <a class="nav__link" href="historias.html" aria-current="page">Historias clínicas</a>
+      </nav>
+      <span class="topbar__date" id="fechaHoy"></span>
+      <button type="button" class="btn btn--primary" onclick="abrirNuevaConsulta()">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>Nueva consulta
+      </button>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page__head">
+      <h1 class="page__title">Historias clínicas</h1>
+      <p class="page__subtitle">Registro de consultas, diagnósticos y tratamientos de cada paciente.</p>
+    </div>
+
+    <!-- Métricas (también filtran por estado) -->
+    <div class="kpis" role="group" aria-label="Filtrar consultas por estado">
+      <button type="button" class="kpi is-active" data-filtro="" aria-pressed="true">
+        <span class="kpi__label"><i class="dot dot--all"></i>Consultas</span>
+        <span class="kpi__value" id="cntTodas">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="En seguimiento" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--abierta"></i>En seguimiento</span>
+        <span class="kpi__value" id="cntSeguimiento">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="Hospitalizado" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--critico"></i>Hospitalizados</span>
+        <span class="kpi__value" id="cntHospitalizado">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="Alta" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--terminada"></i>Con alta</span>
+        <span class="kpi__value" id="cntAlta">0</span>
+      </button>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="toolbar">
+      <div class="search" id="searchWrap">
+        <svg class="icon search__icon" aria-hidden="true"><use href="#i-search" /></svg>
+        <input type="search" id="busqueda" class="input" placeholder="Buscar por paciente, propietario o diagnóstico"
+          aria-label="Buscar por paciente, propietario o diagnóstico" autocomplete="off" />
+        <button type="button" class="search__clear" id="limpiarBusqueda" aria-label="Borrar búsqueda">
+          <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
+      <div class="toolbar__count" id="contadorResultados" aria-live="polite"></div>
+    </div>
+
+    <!-- Tabla de consultas -->
+    <section class="table-card" aria-label="Listado de consultas">
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="visually-hidden">Consultas clínicas registradas, ordenadas de la más reciente a la más antigua</caption>
+          <thead>
+            <tr>
+              <th scope="col">Paciente</th>
+              <th scope="col">Propietario</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Diagnóstico</th>
+              <th scope="col">Veterinario</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="visually-hidden">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTabla"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Diálogo: crear / editar consulta -->
+  <dialog class="dialog" id="registroModal" aria-labelledby="tituloModal">
+    <form id="formularioConsulta" class="dialog__form" novalidate>
+      <div class="dialog__header">
+        <h2 class="dialog__title" id="tituloModal">Nueva consulta</h2>
+        <button type="button" class="dialog__close" onclick="cerrarRegistro()" aria-label="Cerrar">
+          <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
+
+      <div class="dialog__body">
+        <input type="hidden" id="indiceEditar" />
+
+        <div class="form-grid">
+          <!-- Columna: paciente -->
+          <fieldset class="fieldset">
+            <legend class="fieldset__title">Paciente</legend>
+
+            <div class="field">
+              <label for="nombreMascota" class="field__label">Nombre de la mascota <b>*</b></label>
+              <input type="text" class="input" id="nombreMascota" list="pacientesConocidos" placeholder="Ej. Max" maxlength="60" autocomplete="off" />
+              <datalist id="pacientesConocidos"></datalist>
+              <div class="field__error" id="error-nombreMascota"></div>
+            </div>
+
+            <div class="field">
+              <label for="tipoMascota" class="field__label">Tipo de mascota <b>*</b></label>
+              <select class="select" id="tipoMascota">
+                <option value="">Seleccione...</option>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Ave">Ave</option>
+                <option value="Hamster">Hamster</option>
+                <option value="Tortuga">Tortuga</option>
+                <option value="Conejo">Conejo</option>
+                <option value="Cobaya">Cobaya</option>
+                <option value="Erizo">Erizo</option>
+                <option value="Hurón">Hurón</option>
+                <option value="Otro">Otro</option>
+              </select>
+              <div class="field__error" id="error-tipoMascota"></div>
+            </div>
+
+            <div class="field">
+              <label for="propietario" class="field__label">Propietario <b>*</b></label>
+              <input type="text" class="input" id="propietario" placeholder="Ej. María Pérez" maxlength="60" autocomplete="off" />
+              <div class="field__error" id="error-propietario"></div>
+            </div>
+          </fieldset>
+
+          <!-- Columna: consulta -->
+          <fieldset class="fieldset">
+            <legend class="fieldset__title">Consulta</legend>
+
+            <div class="field">
+              <label for="fechaConsulta" class="field__label">Fecha de la consulta <b>*</b></label>
+              <input type="date" class="input" id="fechaConsulta" />
+              <div class="field__error" id="error-fechaConsulta"></div>
+            </div>
+
+            <div class="field">
+              <label for="veterinario" class="field__label">Veterinario <b>*</b></label>
+              <input type="text" class="input" id="veterinario" placeholder="Ej. Dra. Ana Torres" maxlength="60" autocomplete="off" />
+              <div class="field__error" id="error-veterinario"></div>
+            </div>
+
+            <div class="field">
+              <label for="estado" class="field__label">Estado del paciente</label>
+              <select class="select" id="estado">
+                <option value="En seguimiento">En seguimiento</option>
+                <option value="Hospitalizado">Hospitalizado</option>
+                <option value="Alta">Alta</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <!-- Fila completa: signos vitales -->
+          <fieldset class="fieldset form-grid__full">
+            <legend class="fieldset__title">Signos vitales y control</legend>
+            <div class="cols-3">
+              <div class="field">
+                <label for="peso" class="field__label">Peso (kg)</label>
+                <input type="number" class="input" id="peso" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 12.5" />
+                <div class="field__error" id="error-peso"></div>
+              </div>
+              <div class="field">
+                <label for="temperatura" class="field__label">Temperatura (°C)</label>
+                <input type="number" class="input" id="temperatura" min="0" step="0.1" inputmode="decimal" placeholder="Ej. 38.5" />
+                <div class="field__error" id="error-temperatura"></div>
+              </div>
+              <div class="field">
+                <label for="proximoControl" class="field__label">Próximo control</label>
+                <input type="date" class="input" id="proximoControl" />
+                <div class="field__error" id="error-proximoControl"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Fila completa: clínica -->
+          <fieldset class="fieldset form-grid__full">
+            <legend class="fieldset__title">Valoración clínica</legend>
+
+            <div class="field">
+              <label for="diagnostico" class="field__label">Diagnóstico <b>*</b></label>
+              <input type="text" class="input" id="diagnostico" placeholder="Ej. Gastroenteritis aguda" maxlength="150" autocomplete="off" />
+              <div class="field__error" id="error-diagnostico"></div>
+            </div>
+
+            <div class="field">
+              <label for="tratamiento" class="field__label">Tratamiento <b>*</b></label>
+              <textarea class="textarea" id="tratamiento" rows="3" maxlength="500"
+                placeholder="Medicamentos, dosis, indicaciones y dieta"></textarea>
+              <div class="field__error" id="error-tratamiento"></div>
+            </div>
+
+            <div class="field">
+              <label for="observaciones" class="field__label">Observaciones</label>
+              <textarea class="textarea" id="observaciones" rows="2" maxlength="500"
+                placeholder="Notas adicionales (opcional)"></textarea>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="dialog__footer">
+        <button type="button" class="btn btn--secondary" onclick="cerrarRegistro()">Cancelar</button>
+        <button type="submit" class="btn btn--primary">Guardar consulta</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Diálogo: detalle (solo lectura) -->
+  <dialog class="dialog dialog--md" id="detalleModal" aria-labelledby="detalleTitulo">
+    <div class="dialog__header">
+      <h2 class="dialog__title" id="detalleTitulo">Detalle de la consulta</h2>
+      <button type="button" class="dialog__close" onclick="document.getElementById('detalleModal').close()" aria-label="Cerrar">
+        <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+    <div class="dialog__body" id="detalleCuerpo"></div>
+    <div class="dialog__footer">
+      <button type="button" class="btn btn--secondary" onclick="document.getElementById('detalleModal').close()">Cerrar</button>
+      <button type="button" class="btn btn--primary" id="detalleEditar">Editar consulta</button>
+    </div>
+  </dialog>
+
+  <!-- Diálogo: confirmar eliminación -->
+  <dialog class="dialog dialog--sm" id="confirmarEliminarModal" aria-labelledby="tituloEliminar">
+    <div class="dialog__header">
+      <h2 class="dialog__title" id="tituloEliminar">Eliminar consulta</h2>
+      <button type="button" class="dialog__close" onclick="document.getElementById('confirmarEliminarModal').close()" aria-label="Cerrar">
+        <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+    <div class="dialog__body">
+      <p id="textoEliminar">Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="dialog__footer">
+      <button type="button" class="btn btn--secondary" onclick="document.getElementById('confirmarEliminarModal').close()">Cancelar</button>
+      <button type="button" class="btn btn--danger" onclick="eliminarConfirmado()">Sí, eliminar</button>
+    </div>
+  </dialog>
+
+  <!-- Aviso -->
+  <div class="toast" id="toastAviso" role="status" aria-live="polite"></div>
+
+  <script>
+    let consultas = [];
+    let filtroActual = "";
+
+    const imagenesmascotas = {
+      Perro: "https://png.pngtree.com/png-vector/20231014/ourmid/pngtree-dog-face-png-illustration-png-image_10158271.png",
+      Gato: "https://static.vecteezy.com/system/resources/thumbnails/047/493/988/small_2x/hairy-fluffy-cat-playing-png.png",
+      Ave: "https://static.vecteezy.com/system/resources/previews/022/984/697/non_2x/bird-amazonian-motmot-drawing-feather-free-png.png",
+      Hamster: "https://static.vecteezy.com/system/resources/previews/026/748/774/non_2x/cute-little-hamster-png.png",
+      Tortuga: "https://static.vecteezy.com/system/resources/thumbnails/046/353/622/small/turtle-isolated-on-transparent-background-png.png",
+      Conejo: "https://static.vecteezy.com/system/resources/thumbnails/049/668/304/small_2x/cute-bunny-with-a-transparent-background-adorable-rabbit-image-free-download-high-quality-transparent-pet-animal-png.png",
+      Cobaya: "https://static.vecteezy.com/system/resources/previews/036/083/598/non_2x/ai-generated-bald-guinea-pig-isolated-on-transparent-background-free-png.png",
+      Erizo: "https://static.vecteezy.com/system/resources/previews/049/669/871/non_2x/cute-hedgehog-with-transparent-background-adorable-spiky-mammal-on-a-clear-background-isolated-hedgehog-for-design-projects-hedgehog-clipart-free-downloadable-hedgehog-image-high-resolution-hedgehog-picture-transparent-hedgehog-wildlife-photogr-png.png",
+      Hurón: "https://static.vecteezy.com/system/resources/previews/049/732/118/non_2x/ferret-closeup-of-face-free-png.png",
+      Otro: "https://st2.depositphotos.com/1000938/5198/i/450/depositphotos_51982887-stock-photo-paw-on-puppy.jpg",
+    };
+
+    // Estado clínico -> clase de insignia / punto
+    const CLASE_ESTADO = { 'En seguimiento': 'abierta', 'Hospitalizado': 'critico', 'Alta': 'terminada' };
+
+    const $ = (id) => document.getElementById(id);
+
+    /* ---------- Utilidades ---------- */
+    function escaparHTML(texto) {
+      return String(texto ?? "").replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+      ));
+    }
+
+    function leerStorage(clave) {
+      try { return JSON.parse(localStorage.getItem(clave)) || []; } catch (e) { return []; }
+    }
+    function guardarConsultas() { localStorage.setItem('historiasVeterinaria', JSON.stringify(consultas)); }
+
+    const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    function formatearFecha(fecha) {
+      if (!fecha) return '—';
+      const [anio, mes, dia] = fecha.split('-').map(Number);
+      return `${dia} ${MESES_CORTOS[mes - 1]} ${anio}`;
+    }
+
+    function hoyISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    let temporizadorAviso;
+    function mostrarAviso(texto) {
+      const el = $('toastAviso');
+      el.textContent = texto;
+      el.classList.add('is-visible');
+      clearTimeout(temporizadorAviso);
+      temporizadorAviso = setTimeout(() => el.classList.remove('is-visible'), 2800);
+    }
+
+    /* ---------- Validación ---------- */
+    const CAMPOS = ['nombreMascota', 'tipoMascota', 'propietario', 'fechaConsulta', 'veterinario', 'peso', 'temperatura', 'proximoControl', 'diagnostico', 'tratamiento'];
+
+    function mostrarError(campo, mensaje) {
+      $(campo).classList.add('is-invalid');
+      const e = $('error-' + campo);
+      e.textContent = mensaje;
+      e.style.display = 'block';
+    }
+    function limpiarError(campo) {
+      $(campo).classList.remove('is-invalid');
+      const e = $('error-' + campo);
+      e.textContent = '';
+      e.style.display = 'none';
+    }
+    function limpiarTodosLosErrores() { CAMPOS.forEach(limpiarError); }
+
+    function requerido(campo, valor, mensaje, max) {
+      limpiarError(campo);
+      if (!valor.trim()) { mostrarError(campo, mensaje); return false; }
+      if (max && valor.length > max) { mostrarError(campo, `No puede exceder ${max} caracteres`); return false; }
+      return true;
+    }
+
+    function validarDatos(d) {
+      const r = [];
+      r.push(requerido('nombreMascota', d.nombreMascota, 'El nombre de la mascota es obligatorio', 50));
+      limpiarError('tipoMascota');
+      if (!d.tipoMascota) { mostrarError('tipoMascota', 'Seleccione el tipo de mascota'); r.push(false); } else r.push(true);
+      r.push(requerido('propietario', d.propietario, 'El nombre del propietario es obligatorio', 50));
+
+      limpiarError('fechaConsulta');
+      if (!d.fechaConsulta) { mostrarError('fechaConsulta', 'La fecha es obligatoria'); r.push(false); }
+      else if (d.fechaConsulta > hoyISO()) { mostrarError('fechaConsulta', 'La fecha no puede ser futura'); r.push(false); }
+      else r.push(true);
+
+      r.push(requerido('veterinario', d.veterinario, 'Indique el veterinario que atendió', 50));
+
+      limpiarError('peso');
+      if (d.peso !== '' && !(Number(d.peso) > 0 && Number(d.peso) <= 200)) { mostrarError('peso', 'Ingrese un peso entre 0 y 200 kg'); r.push(false); } else r.push(true);
+
+      limpiarError('temperatura');
+      if (d.temperatura !== '' && !(Number(d.temperatura) >= 30 && Number(d.temperatura) <= 45)) { mostrarError('temperatura', 'Ingrese una temperatura entre 30 y 45 °C'); r.push(false); } else r.push(true);
+
+      limpiarError('proximoControl');
+      if (d.proximoControl && d.fechaConsulta && d.proximoControl < d.fechaConsulta) { mostrarError('proximoControl', 'No puede ser anterior a la consulta'); r.push(false); } else r.push(true);
+
+      r.push(requerido('diagnostico', d.diagnostico, 'El diagnóstico es obligatorio', 150));
+      r.push(requerido('tratamiento', d.tratamiento, 'El tratamiento es obligatorio', 500));
+      return r.every(Boolean);
+    }
+
+    /* ---------- Renderizado ---------- */
+    const PATA_SVG = '<svg class="icon" fill="currentColor" stroke="none" aria-hidden="true"><use href="#i-paw"/></svg>';
+    const icono = (id) => `<svg class="icon" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+    function avatarHTML(tipo, claseExtra = '') {
+      const url = imagenesmascotas[tipo];
+      return `<div class="avatar ${claseExtra}">
+        <span ${url ? 'hidden' : ''}>${PATA_SVG}</span>
+        ${url ? `<img src="${url}" alt="" loading="lazy" onerror="this.previousElementSibling.hidden=false;this.remove()">` : ''}
+      </div>`;
+    }
+
+    function actualizarResumen() {
+      const cuenta = (e) => consultas.filter((c) => c.estado === e).length;
+      $('cntTodas').textContent = consultas.length;
+      $('cntSeguimiento').textContent = cuenta('En seguimiento');
+      $('cntHospitalizado').textContent = cuenta('Hospitalizado');
+      $('cntAlta').textContent = cuenta('Alta');
+      document.querySelectorAll('.kpi').forEach((btn) => {
+        const activo = btn.dataset.filtro === filtroActual;
+        btn.classList.toggle('is-active', activo);
+        btn.setAttribute('aria-pressed', activo);
+      });
+    }
+
+    function filaHTML(c, i) {
+      const clase = CLASE_ESTADO[c.estado] || 'anulada';
+      return `
+      <tr>
+        <td data-label="Paciente">
+          <div class="cell-patient">
+            ${avatarHTML(c.tipoMascota, 'avatar--sm')}
+            <div>
+              <div class="cell-patient__name">${escaparHTML(c.nombreMascota)}</div>
+              <div class="cell-patient__meta">${escaparHTML(c.tipoMascota)}</div>
+            </div>
+          </div>
+        </td>
+        <td data-label="Propietario">${escaparHTML(c.propietario)}</td>
+        <td data-label="Fecha" class="cell-date">${formatearFecha(c.fechaConsulta)}</td>
+        <td data-label="Diagnóstico"><span class="cell-clamp">${escaparHTML(c.diagnostico)}</span></td>
+        <td data-label="Veterinario">${escaparHTML(c.veterinario)}</td>
+        <td data-label="Estado"><span class="badge badge--${clase}">${escaparHTML(c.estado)}</span></td>
+        <td class="cell-actions">
+          <div class="row-actions">
+            <button type="button" class="icon-btn" onclick="verDetalle(${i})" aria-label="Ver detalle de ${escaparHTML(c.nombreMascota)}" title="Ver detalle">${icono('i-eye')}</button>
+            <button type="button" class="icon-btn" onclick="editar(${i})" aria-label="Editar consulta de ${escaparHTML(c.nombreMascota)}" title="Editar">${icono('i-edit')}</button>
+            <button type="button" class="icon-btn icon-btn--danger" onclick="prepararEliminar(${i})" aria-label="Eliminar consulta de ${escaparHTML(c.nombreMascota)}" title="Eliminar">${icono('i-trash')}</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    function pintarTabla() {
+      const texto = $("busqueda").value.trim().toLowerCase();
+      actualizarResumen();
+
+      const filtradas = consultas
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => {
+          if (filtroActual && c.estado !== filtroActual) return false;
+          if (texto && ![c.nombreMascota, c.propietario, c.diagnostico].some((v) => v.toLowerCase().includes(texto))) return false;
+          return true;
+        })
+        .sort((a, b) => b.c.fechaConsulta.localeCompare(a.c.fechaConsulta));
+
+      $('contadorResultados').textContent =
+        consultas.length ? `${filtradas.length} ${filtradas.length === 1 ? 'consulta' : 'consultas'}` : '';
+
+      const cuerpo = $('cuerpoTabla');
+      if (!filtradas.length) {
+        const vacio = consultas.length === 0
+          ? `<div class="empty">
+               <div class="empty__icon">${icono('i-file')}</div>
+               <h2>Aún no hay consultas registradas</h2>
+               <p>Registra la primera consulta para construir la historia clínica de tus pacientes.</p>
+               <button type="button" class="btn btn--primary" onclick="abrirNuevaConsulta()">Registrar primera consulta</button>
+             </div>`
+          : `<div class="empty">
+               <div class="empty__icon">${icono('i-search')}</div>
+               <h2>Sin resultados</h2>
+               <p>Prueba con otro término o cambia el filtro de estado.</p>
+               <button type="button" class="btn btn--secondary" onclick="limpiarFiltros()">Quitar filtros</button>
+             </div>`;
+        cuerpo.innerHTML = `<tr><td class="table-empty" colspan="7">${vacio}</td></tr>`;
+        return;
+      }
+      cuerpo.innerHTML = filtradas.map(({ c, i }) => filaHTML(c, i)).join("");
+    }
+
+    function limpiarFiltros() {
+      filtroActual = "";
+      $("busqueda").value = "";
+      $("searchWrap").classList.remove("has-value");
+      pintarTabla();
+    }
+
+    /* ---------- Diálogo de consulta ---------- */
+    const dlgRegistro = $("registroModal");
+    const dlgDetalle = $("detalleModal");
+    const dlgEliminar = $("confirmarEliminarModal");
+
+    function resetearFormulario() {
+      $("formularioConsulta").reset();
+      $("indiceEditar").value = "";
+      $("tituloModal").textContent = "Nueva consulta";
+      limpiarTodosLosErrores();
+    }
+
+    function abrirNuevaConsulta() {
+      resetearFormulario();
+      $("fechaConsulta").value = hoyISO();
+      dlgRegistro.showModal();
+      $("nombreMascota").focus();
+    }
+
+    function cerrarRegistro() { dlgRegistro.close(); }
+    dlgRegistro.addEventListener("close", resetearFormulario);
+
+    function editar(i) {
+      if (dlgDetalle.open) dlgDetalle.close();
+      resetearFormulario();
+      const c = consultas[i];
+      CAMPOS.concat(['estado', 'observaciones']).forEach((campo) => { $(campo).value = c[campo] ?? ""; });
+      $("indiceEditar").value = i;
+      $("tituloModal").textContent = "Editar consulta";
+      dlgRegistro.showModal();
+    }
+
+    $("formularioConsulta").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const indice = $("indiceEditar").value;
+      const datos = {};
+      CAMPOS.concat(['estado', 'observaciones']).forEach((campo) => { datos[campo] = $(campo).value.trim(); });
+
+      if (!validarDatos(datos)) {
+        const primero = this.querySelector('.is-invalid');
+        if (primero) primero.focus();
+        return;
+      }
+
+      const esEdicion = indice !== "";
+      if (esEdicion) consultas[parseInt(indice)] = datos; else consultas.push(datos);
+      guardarConsultas();
+      pintarTabla();
+      actualizarPacientesConocidos();
+      dlgRegistro.close();
+      mostrarAviso(esEdicion ? 'Consulta actualizada' : 'Consulta registrada correctamente');
+    });
+
+    /* ---------- Detalle ---------- */
+    function verDetalle(i) {
+      const c = consultas[i];
+      const clase = CLASE_ESTADO[c.estado] || 'anulada';
+      const valor = (v, u = '') => (v !== '' && v != null ? `${escaparHTML(v)}${u}` : '—');
+
+      $('detalleCuerpo').innerHTML = `
+        <div class="detail__head">
+          ${avatarHTML(c.tipoMascota, 'avatar--lg')}
+          <div>
+            <h3 class="detail__title">${escaparHTML(c.nombreMascota)}</h3>
+            <div class="detail__sub">${escaparHTML(c.tipoMascota)} · ${escaparHTML(c.propietario)}</div>
+          </div>
+          <span class="badge badge--${clase}">${escaparHTML(c.estado)}</span>
+        </div>
+
+        <div class="detail__metrics">
+          <div class="metric"><span class="metric__label">Peso</span><span class="metric__value">${valor(c.peso, ' kg')}</span></div>
+          <div class="metric"><span class="metric__label">Temperatura</span><span class="metric__value">${valor(c.temperatura, ' °C')}</span></div>
+          <div class="metric"><span class="metric__label">Próximo control</span><span class="metric__value">${formatearFecha(c.proximoControl)}</span></div>
+        </div>
+
+        <dl class="detail__meta">
+          <div><dt>Fecha de la consulta</dt><dd>${formatearFecha(c.fechaConsulta)}</dd></div>
+          <div><dt>Veterinario</dt><dd>${escaparHTML(c.veterinario)}</dd></div>
+        </dl>
+
+        <div class="detail__section"><h3>Diagnóstico</h3><p>${escaparHTML(c.diagnostico)}</p></div>
+        <div class="detail__section"><h3>Tratamiento</h3><p>${escaparHTML(c.tratamiento)}</p></div>
+        ${c.observaciones ? `<div class="detail__section"><h3>Observaciones</h3><p>${escaparHTML(c.observaciones)}</p></div>` : ''}
+      `;
+      $('detalleEditar').onclick = () => editar(i);
+      dlgDetalle.showModal();
+    }
+
+    /* ---------- Eliminar ---------- */
+    let indexEliminar = null;
+    function prepararEliminar(i) {
+      indexEliminar = i;
+      const c = consultas[i];
+      $('textoEliminar').textContent =
+        `Se eliminará la consulta de ${c.nombreMascota} del ${formatearFecha(c.fechaConsulta)}. Esta acción no se puede deshacer.`;
+      dlgEliminar.showModal();
+    }
+
+    function eliminarConfirmado() {
+      if (indexEliminar === null) return;
+      consultas.splice(indexEliminar, 1);
+      indexEliminar = null;
+      guardarConsultas();
+      pintarTabla();
+      actualizarPacientesConocidos();
+      dlgEliminar.close();
+      mostrarAviso('Consulta eliminada');
+    }
+
+    [dlgEliminar, dlgDetalle].forEach((d) =>
+      d.addEventListener("click", (e) => { if (e.target === d) d.close(); }));
+
+    /* ---------- Filtros y búsqueda ---------- */
+    document.querySelectorAll('.kpi').forEach((btn) => {
+      btn.addEventListener('click', () => { filtroActual = btn.dataset.filtro; pintarTabla(); });
+    });
+
+    $("busqueda").addEventListener("input", () => {
+      $("searchWrap").classList.toggle("has-value", $("busqueda").value !== "");
+      pintarTabla();
+    });
+
+    $("limpiarBusqueda").addEventListener("click", () => {
+      $("busqueda").value = "";
+      $("searchWrap").classList.remove("has-value");
+      pintarTabla();
+      $("busqueda").focus();
+    });
+
+    /* ---------- Pacientes conocidos (citas + historias) ----------
+       Sugiere nombres ya registrados y autocompleta tipo y propietario. */
+    let pacientes = [];
+    function actualizarPacientesConocidos() {
+      const mapa = new Map();
+      leerStorage('citasVeterinaria').forEach((c) =>
+        mapa.set(c.nombreMascota.toLowerCase(), { nombre: c.nombreMascota, tipo: c.tipoMascota, propietario: c.nombrePropietario }));
+      consultas.forEach((c) =>
+        mapa.set(c.nombreMascota.toLowerCase(), { nombre: c.nombreMascota, tipo: c.tipoMascota, propietario: c.propietario }));
+      pacientes = [...mapa.values()];
+      $('pacientesConocidos').innerHTML = pacientes.map((p) => `<option value="${escaparHTML(p.nombre)}"></option>`).join("");
+    }
+
+    $("nombreMascota").addEventListener("change", () => {
+      const p = pacientes.find((x) => x.nombre.toLowerCase() === $("nombreMascota").value.trim().toLowerCase());
+      if (!p) return;
+      if (!$("tipoMascota").value) { $("tipoMascota").value = p.tipo; limpiarError('tipoMascota'); }
+      if (!$("propietario").value) { $("propietario").value = p.propietario; limpiarError('propietario'); }
+    });
+
+    // Al corregir un campo, su error desaparece
+    CAMPOS.forEach((campo) => {
+      $(campo).addEventListener("input", () => limpiarError(campo));
+      $(campo).addEventListener("change", () => limpiarError(campo));
+    });
+
+    /* ---------- Inicio ---------- */
+    document.addEventListener('DOMContentLoaded', function () {
+      consultas = leerStorage('historiasVeterinaria');
+      $('fechaConsulta').max = hoyISO();
+      $('fechaHoy').textContent =
+        new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      actualizarPacientesConocidos();
+      pintarTabla();
+    });
+  </script>
+</body>
+
+</html>
