@@ -877,24 +877,41 @@
     });
 
     /** Desplazamiento suave propio: permite controlar la duración. */
+    var animId = 0;   // identifica la animación vigente: una nueva cancela la anterior
+
+    /* Mientras corre la animación se desactiva scroll-snap: con "mandatory" el
+       navegador reajusta cada fotograma a la diapositiva más cercana y la
+       transición se veía como un salto tardío en vez de un deslizamiento. */
+    function terminarAnimacion() {
+      animando = false;
+      viewport.style.scrollSnapType = '';
+    }
+
     function deslizarHasta(destino, duracion) {
-      if (prefersReducedMotion || !duracion) { viewport.scrollLeft = destino; return; }
+      var miId = ++animId;
+      if (prefersReducedMotion || !duracion) {
+        terminarAnimacion();
+        viewport.scrollLeft = destino;
+        return;
+      }
 
       var inicio = viewport.scrollLeft;
       var delta  = destino - inicio;
-      if (!delta) return;
+      if (!delta) { terminarAnimacion(); return; }
 
       var t0 = null;
       animando = true;
+      viewport.style.scrollSnapType = 'none';
 
       function paso(ahora) {
+        if (miId !== animId) return;   // otra animación tomó el relevo
         if (t0 === null) t0 = ahora;
         var p = Math.min(1, (ahora - t0) / duracion);
         // easeInOutCubic: arranque y frenada suaves
         var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
         viewport.scrollLeft = inicio + delta * e;
         if (p < 1) { window.requestAnimationFrame(paso); }
-        else { animando = false; }
+        else { terminarAnimacion(); }
       }
       window.requestAnimationFrame(paso);
     }
@@ -929,9 +946,11 @@
       if (temporizador) { window.clearInterval(temporizador); temporizador = null; }
     }
 
-    // Pausa mientras el cursor está encima
-    carrusel.addEventListener('mouseenter', function () { pausaPuntero = true; });
-    carrusel.addEventListener('mouseleave', function () { pausaPuntero = false; });
+    // Pausa mientras el cursor está encima. Sólo con ratón: en pantallas táctiles
+    // un toque simula "mouseenter" y nunca "mouseleave", y el carrusel quedaba
+    // detenido hasta tocar otra parte de la página.
+    carrusel.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') pausaPuntero = true; });
+    carrusel.addEventListener('pointerleave', function () { pausaPuntero = false; });
 
     // Pausa sólo con foco de teclado: un clic de ratón en una flecha o un punto
     // no debe dejar el carrusel detenido para siempre.
