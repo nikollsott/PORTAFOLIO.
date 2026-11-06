@@ -4,176 +4,278 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patitas Felices</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="index.css">
+  <title>Patitas Sanas · Agenda de citas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <div class="container py-4">
-    <img src="titulo.png" alt="titulo" class="logo mb-4" />
-    <hr>
+  <!-- Iconos (sprite SVG) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-paw" viewBox="0 0 24 24">
+      <circle cx="5.5" cy="11" r="2" /><circle cx="9.5" cy="6.5" r="2" /><circle cx="14.5" cy="6.5" r="2" /><circle cx="18.5" cy="11" r="2" />
+      <path d="M12 12.5c-3 0-5.5 3-5.5 5.2 0 1.6 1.4 2.3 2.8 2.3 1 0 1.8-.5 2.7-.5s1.7.5 2.7.5c1.4 0 2.8-.7 2.8-2.3 0-2.2-2.5-5.2-5.5-5.2z" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+  </svg>
 
-    <div class="d-flex justify-content-between mb-3">
-      <input type="text" id="busqueda" class="form-control w-25" placeholder="Buscar por mascota o propietario" />
-
-      <select id="filtroEstado" class="form-select w-auto">
-        <option value="">Todas</option>
-        <option value="Abierta">Abierta</option>
-        <option value="Terminada">Terminada</option>
-        <option value="Anulada">Anulada</option>
-      </select>
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registroModal">
-        <strong>Agregar Cita</strong>
+  <!-- Cabecera -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <img src="titulo.png" alt="Patitas Sanas" class="logo" />
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="index.html" aria-current="page">Citas</a>
+        <a class="nav__link" href="historias.html">Historias clínicas</a>
+      </nav>
+      <span class="topbar__date" id="fechaHoy"></span>
+      <button type="button" class="btn btn--primary" onclick="abrirNuevaCita()">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>Nueva cita
       </button>
     </div>
-    <div id="contenedorTarjetas" class="row g-4"></div>
-  </div>
+  </header>
 
-  <!-- Modal -->
-  <div class="modal fade" id="registroModal" tabindex="-1" aria-labelledby="registroModalLabel" aria-hidden="true"
-    data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="registroModalLabel"><strong>Registro Paciente</strong></h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+  <main class="page">
+    <div class="page__head">
+      <h1 class="page__title">Agenda de citas</h1>
+      <p class="page__subtitle">Consulta, busca y gestiona las citas de tus pacientes.</p>
+    </div>
+
+    <!-- Indicadores (también filtran por estado) -->
+    <div class="kpis" role="group" aria-label="Filtrar citas por estado">
+      <button type="button" class="kpi is-active" data-filtro="" aria-pressed="true">
+        <span class="kpi__label"><i class="dot dot--all"></i>Todas</span>
+        <span class="kpi__value" id="cntTodas">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="Abierta" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--abierta"></i>Abiertas</span>
+        <span class="kpi__value" id="cntAbiertas">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="Terminada" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--terminada"></i>Terminadas</span>
+        <span class="kpi__value" id="cntTerminadas">0</span>
+      </button>
+      <button type="button" class="kpi" data-filtro="Anulada" aria-pressed="false">
+        <span class="kpi__label"><i class="dot dot--anulada"></i>Anuladas</span>
+        <span class="kpi__value" id="cntAnuladas">0</span>
+      </button>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="toolbar">
+      <div class="search" id="searchWrap">
+        <svg class="icon search__icon" aria-hidden="true"><use href="#i-search" /></svg>
+        <input type="search" id="busqueda" class="input" placeholder="Buscar por mascota o propietario"
+          aria-label="Buscar por mascota o propietario" autocomplete="off" />
+        <button type="button" class="search__clear" id="limpiarBusqueda" aria-label="Borrar búsqueda">
+          <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
+      <div class="toolbar__count" id="contadorResultados" aria-live="polite"></div>
+      <div class="segmented" role="group" aria-label="Tipo de vista">
+        <button type="button" class="segmented__btn is-active" data-vista="lista" aria-pressed="true">Lista</button>
+        <button type="button" class="segmented__btn" data-vista="calendario" aria-pressed="false">Calendario</button>
+      </div>
+    </div>
+
+    <!-- Vista lista (CSS Grid) -->
+    <div id="contenedorTarjetas" class="grid"></div>
+
+    <!-- Vista calendario -->
+    <section id="vistaCalendario" class="cal" aria-label="Calendario de citas" hidden>
+      <div class="cal__head">
+        <h2 class="cal__title" id="calTitulo"></h2>
+        <div class="cal__nav">
+          <button type="button" class="btn btn--secondary btn--sm" onclick="irAHoy()">Hoy</button>
+          <button type="button" class="icon-btn" onclick="cambiarMes(-1)" aria-label="Mes anterior">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-left" /></svg>
+          </button>
+          <button type="button" class="icon-btn" onclick="cambiarMes(1)" aria-label="Mes siguiente">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-right" /></svg>
+          </button>
         </div>
-        <div class="modal-body">
-          <form id="formularioCita">
-            <input type="hidden" id="indiceEditar" />
+      </div>
+      <div class="cal__weekdays" aria-hidden="true">
+        <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+      </div>
+      <div class="cal__grid" id="calGrid"></div>
+    </section>
+  </main>
 
+  <!-- Diálogo: crear / editar cita -->
+  <dialog class="dialog" id="registroModal" aria-labelledby="tituloModal">
+    <form id="formularioCita" class="dialog__form" novalidate>
+      <div class="dialog__header">
+        <h2 class="dialog__title" id="tituloModal">Nueva cita</h2>
+        <button type="button" class="dialog__close" onclick="cerrarRegistro()" aria-label="Cerrar">
+          <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="nombremascota" class="form-label"><strong>Nombre del paciente </strong></label>
-                  <input type="text" class="form-control" id="nombremascota" />
-                  <div class="error-message" id="error-nombremascota"></div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="tipoMascota" class="form-label"><strong>Tipo de paciente</strong></label>
-                  <select class="form-select" id="tipoMascota">
-                    <option value="">Seleccione...</option>
-                    <option value="Perro">Perro</option>
-                    <option value="Gato">Gato</option>
-                    <option value="Ave">Ave</option>
-                    <option value="Hamster">Hamster</option>
-                    <option value="Tortuga">Tortuga</option>
-                    <option value="Conejo">Conejo</option>
-                    <option value="Cobaya">Cobaya</option>
-                    <option value="Erizo">Erizo</option>
-                    <option value="Hurón">Hurón</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                  <div class="error-message" id="error-tipoMascota"></div>
-                </div>
-              </div>
+      <div class="dialog__body">
+        <input type="hidden" id="indiceEditar" />
+
+        <div class="form-grid">
+          <!-- Columna: paciente -->
+          <fieldset class="fieldset">
+            <legend class="fieldset__title">Datos del paciente</legend>
+
+            <div class="field">
+              <label for="nombremascota" class="field__label">Nombre de la mascota <b>*</b></label>
+              <input type="text" class="input" id="nombremascota" placeholder="Ej. Max" maxlength="60" autocomplete="off" />
+              <div class="field__error" id="error-nombremascota"></div>
             </div>
 
-
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="nombrePropietario" class="form-label"><strong>Nombre del amo</strong></label>
-                  <input type="text" class="form-control" id="nombrePropietario" />
-                  <div class="error-message" id="error-nombrePropietario"></div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="telefono" class="form-label"><strong>Teléfono</strong></label>
-                  <input type="number" class="form-control" id="telefono" />
-                  <div class="error-message" id="error-telefono"></div>
-                </div>
-              </div>
-            </div>
-            <hr>
-
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="fechaCita" class="form-label"><strong>Fecha de Cita</strong></label>
-                  <input type="date" class="form-control" id="fechaCita" />
-                  <div class="error-message" id="error-fechaCita"></div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="horaCita" class="form-label"><strong>Hora de Cita</strong></label>
-                  <input type="time" class="form-control" id="horaCita" />
-                  <div class="error-message" id="error-horaCita"></div>
-                </div>
-              </div>
-            </div>
-
-
-            <div class="mb-3">
-              <label for="sintomas" class="form-label"><strong>Motivo de consulta</strong></label>
-              <textarea class="form-control" id="sintomas" maxlength="400" rows="3"></textarea>
-              <div class="error-message" id="error-sintomas"></div>
-            </div>
-
-
-            <div class="mb-3">
-              <label for="estado" class="form-label"><strong>Estado</strong></label>
-              <select class="form-select" id="estado">
-                <option value="Abierta">Abierta</option>
-                <option value="Terminada">Terminada</option>
-                <option value="Anulada">Anulada</option>
+            <div class="field">
+              <label for="tipoMascota" class="field__label">Tipo de mascota <b>*</b></label>
+              <select class="select" id="tipoMascota">
+                <option value="">Seleccione...</option>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Ave">Ave</option>
+                <option value="Hamster">Hamster</option>
+                <option value="Tortuga">Tortuga</option>
+                <option value="Conejo">Conejo</option>
+                <option value="Cobaya">Cobaya</option>
+                <option value="Erizo">Erizo</option>
+                <option value="Hurón">Hurón</option>
+                <option value="Otro">Otro</option>
               </select>
+              <div class="field__error" id="error-tipoMascota"></div>
             </div>
 
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                <strong>Cerrar</strong>
-              </button>
-              <button type="submit" class="btn btn-success">
-                <strong>Guardar</strong>
-              </button>
+            <div class="field" id="grupoTipoOtro" hidden>
+              <label for="tipoOtro" class="field__label">¿Qué tipo de mascota es? <b>*</b></label>
+              <input type="text" class="input" id="tipoOtro" placeholder="Ej. Iguana, Cerdo, Pez..." maxlength="40" autocomplete="off" />
+              <div class="field__error" id="error-tipoOtro"></div>
             </div>
-          </form>
+          </fieldset>
+
+          <!-- Columna: propietario -->
+          <fieldset class="fieldset">
+            <legend class="fieldset__title">Datos del propietario</legend>
+
+            <div class="field">
+              <label for="nombrePropietario" class="field__label">Nombre completo <b>*</b></label>
+              <input type="text" class="input" id="nombrePropietario" placeholder="Ej. María Pérez" maxlength="60" autocomplete="off" />
+              <div class="field__error" id="error-nombrePropietario"></div>
+            </div>
+
+            <div class="field">
+              <label for="telefono" class="field__label">Teléfono <b>*</b></label>
+              <input type="tel" inputmode="numeric" class="input" id="telefono" placeholder="10 dígitos" maxlength="10" autocomplete="off" />
+              <div class="field__error" id="error-telefono"></div>
+            </div>
+          </fieldset>
+
+          <!-- Fila completa: cita -->
+          <fieldset class="fieldset form-grid__full">
+            <legend class="fieldset__title">Detalles de la cita</legend>
+
+            <div class="cols-3">
+              <div class="field">
+                <label for="fechaCita" class="field__label">Fecha <b>*</b></label>
+                <input type="date" class="input" id="fechaCita" />
+                <div class="field__error" id="error-fechaCita"></div>
+              </div>
+              <div class="field">
+                <label for="horaCita" class="field__label">Hora <b>*</b></label>
+                <input type="time" class="input" id="horaCita" />
+                <span class="field__hint">Atendemos de 8:00 am a 9:00 pm.</span>
+                <span class="field__hint" id="horasOcupadas"></span>
+                <div class="field__error" id="error-horaCita"></div>
+              </div>
+              <div class="field">
+                <label for="estado" class="field__label">Estado</label>
+                <select class="select" id="estado">
+                  <option value="Abierta">Abierta</option>
+                  <option value="Terminada">Terminada</option>
+                  <option value="Anulada">Anulada</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="sintomas" class="field__label">Motivo de consulta <b>*</b></label>
+              <textarea class="textarea" id="sintomas" maxlength="400" rows="3"
+                placeholder="Describe brevemente los síntomas o el motivo de la visita"></textarea>
+              <span class="field__counter" id="contadorSintomas">0 / 400</span>
+              <div class="field__error" id="error-sintomas"></div>
+            </div>
+          </fieldset>
         </div>
       </div>
-    </div>
-  </div>
 
-
-  <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmarEliminarModalLabel">
-            Confirmar Eliminación
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <strong>La cita se eliminará permanentemente. ¿Está seguro de que desea
-            continuar?</strong>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            Cancelar
-          </button>
-          <button type="button" class="btn btn-danger" onclick="eliminarConfirmado()">
-            Eliminar
-          </button>
-        </div>
+      <div class="dialog__footer">
+        <button type="button" class="btn btn--secondary" onclick="cerrarRegistro()">Cancelar</button>
+        <button type="submit" class="btn btn--primary">Guardar cita</button>
       </div>
-    </div>
-  </div>
+    </form>
+  </dialog>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Diálogo: confirmar eliminación -->
+  <dialog class="dialog dialog--sm" id="confirmarEliminarModal" aria-labelledby="tituloEliminar">
+    <div class="dialog__header">
+      <h2 class="dialog__title" id="tituloEliminar">Eliminar cita</h2>
+      <button type="button" class="dialog__close" onclick="document.getElementById('confirmarEliminarModal').close()" aria-label="Cerrar">
+        <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+    <div class="dialog__body">
+      <p id="textoEliminar">Esta acción no se puede deshacer.</p>
+    </div>
+    <div class="dialog__footer">
+      <button type="button" class="btn btn--secondary" onclick="document.getElementById('confirmarEliminarModal').close()">Cancelar</button>
+      <button type="button" class="btn btn--danger" onclick="eliminarConfirmado()">Sí, eliminar</button>
+    </div>
+  </dialog>
+
+  <!-- Diálogo: citas del día -->
+  <dialog class="dialog dialog--md" id="diaModal" aria-labelledby="diaTitulo">
+    <div class="dialog__header">
+      <div>
+        <h2 class="dialog__title" id="diaTitulo"></h2>
+        <div class="detail__sub" id="diaSubtitulo"></div>
+      </div>
+      <button type="button" class="dialog__close" onclick="document.getElementById('diaModal').close()" aria-label="Cerrar">
+        <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+    <div class="dialog__body" id="diaCuerpo"></div>
+    <div class="dialog__footer">
+      <button type="button" class="btn btn--secondary" onclick="document.getElementById('diaModal').close()">Cerrar</button>
+      <button type="button" class="btn btn--primary" id="diaAgendar">Agendar cita este día</button>
+    </div>
+  </dialog>
+
+  <!-- Diálogo: ficha de la cita (paciente y propietario) -->
+  <dialog class="dialog dialog--md" id="fichaModal" aria-labelledby="fichaTitulo">
+    <div class="dialog__header">
+      <h2 class="dialog__title" id="fichaTitulo">Ficha de la cita</h2>
+      <button type="button" class="dialog__close" onclick="document.getElementById('fichaModal').close()" aria-label="Cerrar">
+        <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </div>
+    <div class="dialog__body" id="fichaCuerpo"></div>
+    <div class="dialog__footer">
+      <button type="button" class="btn btn--secondary" onclick="document.getElementById('fichaModal').close()">Cerrar</button>
+      <button type="button" class="btn btn--secondary" id="fichaTerminar">Marcar terminada</button>
+      <button type="button" class="btn btn--primary" id="fichaEditar">Editar cita</button>
+    </div>
+  </dialog>
+
+  <!-- Aviso -->
+  <div class="toast" id="toastAviso" role="status" aria-live="polite"></div>
 
   <script>
-
     let citas = [];
+    let filtroActual = "";
+
     const imagenesmascotas = {
       Perro: "https://png.pngtree.com/png-vector/20231014/ourmid/pngtree-dog-face-png-illustration-png-image_10158271.png",
       Gato: "https://static.vecteezy.com/system/resources/thumbnails/047/493/988/small_2x/hairy-fluffy-cat-playing-png.png",
@@ -187,135 +289,142 @@
       Otro: "https://st2.depositphotos.com/1000938/5198/i/450/depositphotos_51982887-stock-photo-paw-on-puppy.jpg",
     };
 
-    // Funciones para localStorage
+    const $ = (id) => document.getElementById(id);
+
+    /* ---------- Utilidades ---------- */
+    function escaparHTML(texto) {
+      return String(texto ?? "").replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+      ));
+    }
+
     function guardarCitasEnStorage() {
       localStorage.setItem('citasVeterinaria', JSON.stringify(citas));
     }
 
     function cargarCitasDesdeStorage() {
-      const citasGuardadas = localStorage.getItem('citasVeterinaria');
-      if (citasGuardadas) {
-        citas = JSON.parse(citasGuardadas);
+      try {
+        const guardadas = localStorage.getItem('citasVeterinaria');
+        if (guardadas) citas = JSON.parse(guardadas);
+      } catch (e) {
+        citas = [];
       }
     }
 
-    // Función para formatear fecha y hora
-    function formatearFechaHora(fecha, hora) {
-      const meses = [
-        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-      ];
+    const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
-      const [año, mes, dia] = fecha.split('-');
-      const mesNombre = meses[parseInt(mes) - 1];
-
-      // Convertir hora a formato 12 horas
-      const [horas, minutos] = hora.split(':');
-      let horaFormateada = parseInt(horas);
-      const ampm = horaFormateada >= 12 ? 'pm' : 'am';
-
-      if (horaFormateada === 0) {
-        horaFormateada = 12;
-      } else if (horaFormateada > 12) {
-        horaFormateada = horaFormateada - 12;
-      }
-
-      return `${mesNombre}-${dia}-${año} - ${horaFormateada}:${minutos}${ampm}`;
+    function formatearFecha(fecha) {
+      const [anio, mes, dia] = fecha.split('-').map(Number);
+      const d = new Date(anio, mes - 1, dia);
+      return `${DIAS_CORTOS[d.getDay()]}, ${dia} ${MESES_CORTOS[mes - 1]} ${anio}`;
     }
 
+    function formatearHora(hora) {
+      const [h, m] = hora.split(':').map(Number);
+      const ampm = h >= 12 ? 'pm' : 'am';
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+    }
+
+    function etiquetaRelativa(fecha) {
+      const [a, m, d] = fecha.split('-').map(Number);
+      const objetivo = new Date(a, m - 1, d);
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      const dias = Math.round((objetivo - hoy) / 86400000);
+      if (dias === 0) return { texto: 'Hoy', clase: 'when__rel--hoy' };
+      if (dias === 1) return { texto: 'Mañana', clase: '' };
+      if (dias > 1 && dias <= 14) return { texto: `En ${dias} días`, clase: '' };
+      if (dias < 0) return { texto: 'Fecha pasada', clase: '' };
+      return null;
+    }
+
+    let temporizadorAviso;
+    function mostrarAviso(texto) {
+      const el = $('toastAviso');
+      el.textContent = texto;
+      el.classList.add('is-visible');
+      clearTimeout(temporizadorAviso);
+      temporizadorAviso = setTimeout(() => el.classList.remove('is-visible'), 2800);
+    }
+
+    /* ---------- Validación ---------- */
     function mostrarError(campo, mensaje) {
-      const input = document.getElementById(campo);
-      const errorDiv = document.getElementById('error-' + campo);
-
-      input.classList.add('is-invalid');
+      $(campo).classList.add('is-invalid');
+      const errorDiv = $('error-' + campo);
       errorDiv.textContent = mensaje;
       errorDiv.style.display = 'block';
     }
 
-
     function limpiarError(campo) {
-      const input = document.getElementById(campo);
-      const errorDiv = document.getElementById('error-' + campo);
-
-      input.classList.remove('is-invalid');
+      $(campo).classList.remove('is-invalid');
+      const errorDiv = $('error-' + campo);
       errorDiv.textContent = '';
       errorDiv.style.display = 'none';
     }
 
+    const CAMPOS_VALIDABLES = ['nombremascota', 'tipoMascota', 'tipoOtro', 'nombrePropietario', 'telefono', 'fechaCita', 'horaCita', 'sintomas'];
 
     function limpiarTodosLosErrores() {
-      const campos = ['nombremascota', 'tipoMascota', 'nombrePropietario', 'telefono', 'fechaCita', 'horaCita', 'sintomas'];
-      campos.forEach(campo => limpiarError(campo));
+      CAMPOS_VALIDABLES.forEach(limpiarError);
     }
-
 
     function validarNombre(nombre) {
       limpiarError('nombremascota');
-      if (!nombre.trim()) {
-        mostrarError('nombremascota', 'El nombre de la mascota es obligatorio');
-        return false;
-      }
-      if (nombre.length > 50) {
-        mostrarError('nombremascota', 'El nombre no puede exceder los 50 caracteres');
-        return false;
-      }
+      if (!nombre.trim()) { mostrarError('nombremascota', 'El nombre de la mascota es obligatorio'); return false; }
+      if (nombre.length > 50) { mostrarError('nombremascota', 'El nombre no puede exceder los 50 caracteres'); return false; }
       return true;
     }
 
     function validarPropietario(propietario) {
       limpiarError('nombrePropietario');
-      if (!propietario.trim()) {
-        mostrarError('nombrePropietario', 'El nombre del propietario es obligatorio');
-        return false;
-      }
-      if (propietario.length > 50) {
-        mostrarError('nombrePropietario', 'El nombre del propietario no puede exceder los 50 caracteres');
-        return false;
-      }
+      if (!propietario.trim()) { mostrarError('nombrePropietario', 'El nombre del propietario es obligatorio'); return false; }
+      if (propietario.length > 50) { mostrarError('nombrePropietario', 'El nombre del propietario no puede exceder los 50 caracteres'); return false; }
       return true;
     }
 
     function validarTelefono(telefono) {
       limpiarError('telefono');
-      if (!telefono.trim()) {
-        mostrarError('telefono', 'El teléfono es obligatorio');
-        return false;
-      }
-      if (!/^\d{10}$/.test(telefono)) {
-        mostrarError('telefono', 'El teléfono debe tener exactamente 10 dígitos');
-        return false;
-      }
+      if (!telefono.trim()) { mostrarError('telefono', 'El teléfono es obligatorio'); return false; }
+      if (!/^\d{10}$/.test(telefono)) { mostrarError('telefono', 'El teléfono debe tener exactamente 10 dígitos'); return false; }
       return true;
     }
 
     function validarTipo(tipo) {
       limpiarError('tipoMascota');
-      if (!tipo) {
-        mostrarError('tipoMascota', 'Debe seleccionar un tipo de mascota');
-        return false;
-      }
+      if (!tipo) { mostrarError('tipoMascota', 'Debe seleccionar un tipo de mascota'); return false; }
       return true;
     }
 
-    function validarFecha(fecha) {
+    function validarTipoOtro(tipo, otro) {
+      limpiarError('tipoOtro');
+      if (tipo !== 'Otro') return true;
+      if (!otro.trim()) { mostrarError('tipoOtro', 'Indique qué tipo de mascota es'); return false; }
+      return true;
+    }
+
+    // Muestra el campo "especifique" solo cuando el tipo es "Otro"
+    function actualizarTipoOtro() {
+      const esOtro = $('tipoMascota').value === 'Otro';
+      $('grupoTipoOtro').hidden = !esOtro;
+      if (!esOtro) $('tipoOtro').value = '';
+    }
+
+    // fechaOriginal: al editar, si la fecha no cambia no se exige que sea futura
+    // (así se puede corregir o cerrar una cita de hoy o de un día ya pasado)
+    function validarFecha(fecha, fechaOriginal) {
       limpiarError('fechaCita');
-      if (!fecha) {
-        mostrarError('fechaCita', 'La fecha es obligatoria');
-        return false;
-      }
+      if (!fecha) { mostrarError('fechaCita', 'La fecha es obligatoria'); return false; }
+      if (fechaOriginal && fecha === fechaOriginal) return true;
 
       const [anio, mes, dia] = fecha.split('-').map(Number);
-      const fechaSeleccionada = new Date(anio, mes - 1, dia);
-      fechaSeleccionada.setHours(0, 0, 0, 0);
+      const seleccionada = new Date(anio, mes - 1, dia);
+      seleccionada.setHours(0, 0, 0, 0);
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      const manana = new Date(hoy); manana.setDate(hoy.getDate() + 1);
 
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-
-      const manana = new Date(hoy);
-      manana.setDate(hoy.getDate() + 1);
-
-      if (fechaSeleccionada < manana) {
-        mostrarError('fechaCita', 'La fecha debe ser a partir de mañana. No se permiten fechas anteriores ni la de hoy.');
+      if (seleccionada < manana) {
+        mostrarError('fechaCita', 'Elija una fecha desde mañana. No se permiten fechas anteriores ni la de hoy.');
         return false;
       }
       return true;
@@ -323,266 +432,548 @@
 
     function validarHora(hora) {
       limpiarError('horaCita');
-      if (!hora) {
-        mostrarError('horaCita', 'La hora es obligatoria');
-        return false;
-      }
-
-      const [horaCita] = hora.split(':').map(Number);
-      if (horaCita < 8 || horaCita >= 21) {
-        mostrarError('horaCita', 'El horario de atención es de 8:00 AM a 9:00 PM');
-        return false;
-      }
+      if (!hora) { mostrarError('horaCita', 'La hora es obligatoria'); return false; }
+      const [h] = hora.split(':').map(Number);
+      if (h < 8 || h >= 21) { mostrarError('horaCita', 'El horario de atención es de 8:00 AM a 9:00 PM'); return false; }
       return true;
     }
 
     function validarSintomas(sintomas) {
       limpiarError('sintomas');
-      if (!sintomas.trim()) {
-        mostrarError('sintomas', 'Los síntomas son obligatorios');
-        return false;
-      }
-      if (sintomas.length > 400) {
-        mostrarError('sintomas', 'Los síntomas no pueden exceder 400 caracteres');
-        return false;
-      }
+      if (!sintomas.trim()) { mostrarError('sintomas', 'El motivo de consulta es obligatorio'); return false; }
+      if (sintomas.length > 400) { mostrarError('sintomas', 'El motivo no puede exceder 400 caracteres'); return false; }
       return true;
     }
 
-
-    function validarDatos(datos) {
-      let esValido = true;
-
-      if (!validarNombre(datos.nombreMascota)) esValido = false;
-      if (!validarPropietario(datos.nombrePropietario)) esValido = false;
-      if (!validarTelefono(datos.telefono)) esValido = false;
-      if (!validarTipo(datos.tipoMascota)) esValido = false;
-      if (!validarFecha(datos.fechaCita)) esValido = false;
-      if (!validarHora(datos.horaCita)) esValido = false;
-      if (!validarSintomas(datos.sintomas)) esValido = false;
-
-      return esValido;
+    /* ---------- Disponibilidad de horario ----------
+       Una misma fecha y hora solo admite una cita. Las anuladas no ocupan el horario. */
+    function buscarConflicto(fecha, hora, indiceIgnorar) {
+      const ignorar = indiceIgnorar === "" || indiceIgnorar == null ? -1 : Number(indiceIgnorar);
+      return citas.find((c, i) =>
+        i !== ignorar && c.estado !== 'Anulada' && c.fechaCita === fecha && c.horaCita === hora) || null;
     }
 
-    function pintarCards(filtro = "", textoBusqueda = "") {
-      const contenedorTarjetas = document.getElementById("contenedorTarjetas");
-      contenedorTarjetas.innerHTML = "";
-      const filtradas = citas.filter((c) => {
-        if (filtro && c.estado !== filtro) return false;
-        if (
-          textoBusqueda &&
-          !(
-            c.nombreMascota.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
-            c.nombrePropietario.toLowerCase().includes(textoBusqueda.toLowerCase())
-          )
-        )
-          return false;
-        return true;
-      });
-      filtradas.sort(
-        (a, b) =>
-          new Date(a.fechaCita + "T" + a.horaCita) -
-          new Date(b.fechaCita + "T" + b.horaCita)
-      );
-      filtradas.forEach((cita, i) => {
-        const indiceOriginal = citas.indexOf(cita);
-        const card = document.createElement("div");
-        card.className = "col-md-4";
-        card.innerHTML = `
-       <div class="card card-cita shadow-lg border-0 h-100">
-  <div class="card-body d-flex flex-column text-center">
-    <div class="mb-3">
-      <img src="${imagenesmascotas[cita.tipoMascota]}" alt="${cita.tipoMascota}" 
-           class="img-fluid rounded-circle border border-3 border-light shadow mascota-img"/>
-    </div>
-    <h5 class="card-title mb-3">${cita.nombreMascota}</h5>
-    
-    <div class="info-section mb-3 flex-grow-1 text-start">
-      <div class="row g-2 mb-2">
-        <div class="col-12">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-user text-primary me-2"></i>
-            <div class="text-nowrap">
-              <span class="fw-semibold">Propietario:</span> ${cita.nombrePropietario}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row g-2 mb-2">
-        <div class="col-12">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-phone text-success me-2"></i>
-            <div class="text-nowrap">
-              <span class="fw-semibold">Teléfono:</span> ${cita.telefono}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row g-2 mb-2">
-        <div class="col-12">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-calendar-alt text-info me-2"></i>
-            <div class="text-nowrap">
-              <span class="fw-semibold">Fecha:</span> ${formatearFechaHora(cita.fechaCita, cita.horaCita)}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row g-2 mb-2">
-        <div class="col-12">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-paw text-warning me-2"></i>
-            <div class="text-nowrap">
-              <span class="fw-semibold">Tipo:</span> ${cita.tipoMascota}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row g-2 mb-3">
-        <div class="col-12">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-info-circle me-2 ${cita.estado === 'Abierta' ? 'text-warning' : cita.estado === 'Terminada' ? 'text-success' : 'text-danger'}"></i>
-            <div>
-              <span class="fw-semibold">Estado:</span>
-              <span class="badge ${cita.estado === 'Abierta' ? 'bg-warning text-dark' : cita.estado === 'Terminada' ? 'bg-success' : 'bg-danger'} ms-2">${cita.estado}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="alert alert-danger border-0 shadow-sm mb-3" style="background:  #D32000D0;">
-      <div class="d-flex align-items-center mb-2">
-        <i class="fas fa-exclamation-triangle text-white me-2"></i>
-        <small class="text-white fw-bold mb-0">MOTIVO DE CONSULTA</small>
-      </div>
-      <div class="text-white fw-semibold">${cita.sintomas}</div>
-    </div>
-    
-    <div class="d-flex justify-content-between gap-2 mt-auto">
-      <button class="btn btn-warning btn-sm flex-fill fw-semibold" onclick="editar(${indiceOriginal})">
-        <i class="fas fa-edit me-1"></i>Editar
-      </button>
-      <button class="btn btn-danger btn-sm flex-fill fw-semibold" onclick="prepararEliminar(${indiceOriginal})">
-        <i class="fas fa-trash me-1"></i>Eliminar
-      </button>
-    </div>
-  </div>
-</div>
-      `;
-        contenedorTarjetas.appendChild(card);
+    function validarDisponibilidad(fecha, hora, indice) {
+      const choque = buscarConflicto(fecha, hora, indice);
+      if (!choque) return true;
+      mostrarError('horaCita',
+        `A las ${formatearHora(hora)} ya está agendado ${choque.nombreMascota} (${choque.nombrePropietario}). Elija otra hora.`);
+      return false;
+    }
+
+    // Muestra bajo el campo "Hora" los horarios ya ocupados en la fecha elegida
+    function actualizarHorasOcupadas() {
+      const fecha = $('fechaCita').value;
+      const indice = $('indiceEditar').value;
+      const ignorar = indice === "" ? -1 : Number(indice);
+      const horas = fecha
+        ? citas.filter((c, i) => i !== ignorar && c.estado !== 'Anulada' && c.fechaCita === fecha)
+            .map((c) => c.horaCita).sort().map(formatearHora)
+        : [];
+      $('horasOcupadas').textContent = horas.length ? `Ocupado ese día: ${horas.join(', ')}` : '';
+    }
+
+    function validarDatos(datos, indice) {
+      // Se evalúan todos para mostrar todos los errores a la vez
+      const fechaOriginal = indice !== "" && citas[Number(indice)] ? citas[Number(indice)].fechaCita : null;
+      const basicos = [
+        validarNombre(datos.nombreMascota),
+        validarTipo(datos.tipoMascota),
+        validarTipoOtro(datos.tipoMascota, datos.tipoOtro),
+        validarPropietario(datos.nombrePropietario),
+        validarTelefono(datos.telefono),
+        validarFecha(datos.fechaCita, fechaOriginal),
+        validarHora(datos.horaCita),
+        validarSintomas(datos.sintomas),
+      ];
+      let ok = basicos.every(Boolean);
+      if (ok && datos.estado !== 'Anulada') ok = validarDisponibilidad(datos.fechaCita, datos.horaCita, indice);
+      return ok;
+    }
+
+    /* ---------- Renderizado ---------- */
+    function actualizarResumen() {
+      const cuenta = (e) => citas.filter((c) => c.estado === e).length;
+      $('cntTodas').textContent = citas.length;
+      $('cntAbiertas').textContent = cuenta('Abierta');
+      $('cntTerminadas').textContent = cuenta('Terminada');
+      $('cntAnuladas').textContent = cuenta('Anulada');
+
+      document.querySelectorAll('.kpi').forEach((btn) => {
+        const activo = btn.dataset.filtro === filtroActual;
+        btn.classList.toggle('is-active', activo);
+        btn.setAttribute('aria-pressed', activo);
       });
     }
 
+    const PATA_SVG = '<svg class="icon" fill="currentColor" stroke="none" aria-hidden="true"><use href="#i-paw"/></svg>';
 
-    document.getElementById("formularioCita").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const indice = document.getElementById("indiceEditar").value;
-      const nuevaCita = {
-        nombreMascota: document.getElementById("nombremascota").value,
-        nombrePropietario: document.getElementById("nombrePropietario").value,
-        telefono: document.getElementById("telefono").value,
-        fechaCita: document.getElementById("fechaCita").value,
-        horaCita: document.getElementById("horaCita").value,
-        tipoMascota: document.getElementById("tipoMascota").value,
-        sintomas: document.getElementById("sintomas").value,
-        estado: document.getElementById("estado").value,
-      };
+    function avatarHTML(tipo, claseExtra = '') {
+      const url = imagenesmascotas[tipo];
+      // Si la imagen no carga, se revela el icono de huella
+      return `<div class="avatar ${claseExtra}">
+        <span ${url ? 'hidden' : ''}>${PATA_SVG}</span>
+        ${url ? `<img src="${url}" alt="${escaparHTML(tipo)}" loading="lazy" onerror="this.previousElementSibling.hidden=false;this.remove()">` : ''}
+      </div>`;
+    }
 
-      if (!validarDatos(nuevaCita)) return;
+    function tarjetaHTML(cita, indice) {
+      const estadoClase = cita.estado.toLowerCase();
+      const rel = cita.estado === 'Abierta' ? etiquetaRelativa(cita.fechaCita) : null;
+      const tipo = cita.tipoMascota === 'Otro' && cita.tipoOtro ? `Otro: ${cita.tipoOtro}` : cita.tipoMascota;
 
-      if (indice !== "") {
-        citas[parseInt(indice)] = nuevaCita;
-      } else {
-        citas.push(nuevaCita);
+      return `
+      <article class="card card--${estadoClase}">
+        <div class="card__body">
+          <div class="card__head">
+            ${avatarHTML(cita.tipoMascota)}
+            <div class="card__who">
+              <h3 class="card__name">${escaparHTML(cita.nombreMascota)}</h3>
+              <div class="card__type">${escaparHTML(tipo)}</div>
+            </div>
+            <span class="badge badge--${estadoClase}">${escaparHTML(cita.estado)}</span>
+          </div>
+
+          <div class="when">
+            <div><span class="when__label">Fecha</span><span class="when__value">${formatearFecha(cita.fechaCita)}</span></div>
+            <div><span class="when__label">Hora</span><span class="when__value">${formatearHora(cita.horaCita)}</span></div>
+            ${rel ? `<span class="when__rel ${rel.clase}">${rel.texto}</span>` : ''}
+          </div>
+
+          <dl class="info">
+            <dt>Propietario</dt>
+            <dd>${escaparHTML(cita.nombrePropietario)}</dd>
+            <dt>Teléfono</dt>
+            <dd><a href="tel:${escaparHTML(cita.telefono)}">${escaparHTML(cita.telefono)}</a></dd>
+            <dt>Motivo</dt>
+            <dd class="info__reason" title="${escaparHTML(cita.sintomas)}">${escaparHTML(cita.sintomas)}</dd>
+          </dl>
+        </div>
+
+        <div class="card__actions">
+          <button type="button" class="btn btn--secondary btn--sm" onclick="editar(${indice})">Editar</button>
+          ${cita.estado === 'Abierta'
+          ? `<button type="button" class="btn btn--secondary btn--sm" onclick="marcarTerminada(${indice})">Marcar terminada</button>`
+          : ''}
+          <button type="button" class="btn btn--ghost-danger btn--sm" onclick="prepararEliminar(${indice})" aria-label="Eliminar cita de ${escaparHTML(cita.nombreMascota)}">Eliminar</button>
+        </div>
+      </article>`;
+    }
+
+    // Citas que cumplen el filtro de estado y la búsqueda actuales, ordenadas por fecha y hora
+    function citasFiltradas() {
+      const texto = $("busqueda").value.trim().toLowerCase();
+      return citas
+        .filter((c) => {
+          if (filtroActual && c.estado !== filtroActual) return false;
+          if (texto && !(c.nombreMascota.toLowerCase().includes(texto) || c.nombrePropietario.toLowerCase().includes(texto))) return false;
+          return true;
+        })
+        .sort((a, b) => new Date(a.fechaCita + "T" + a.horaCita) - new Date(b.fechaCita + "T" + b.horaCita));
+    }
+
+    function pintarCards() {
+      const contenedor = $("contenedorTarjetas");
+      actualizarResumen();
+
+      const filtradas = citasFiltradas();
+
+      $('contadorResultados').textContent =
+        citas.length ? `${filtradas.length} ${filtradas.length === 1 ? 'cita' : 'citas'}` : '';
+
+      pintarCalendario(filtradas);
+      if ($('diaModal').open) renderDia();
+      aplicarVista();
+
+      if (!filtradas.length) {
+        contenedor.innerHTML = citas.length === 0
+          ? `<div class="empty">
+               <div class="empty__icon">${PATA_SVG}</div>
+               <h2>No hay citas registradas</h2>
+               <p>Agenda la primera cita para empezar a organizar la atención de tus pacientes.</p>
+               <button type="button" class="btn btn--primary" onclick="abrirNuevaCita()">Agendar primera cita</button>
+             </div>`
+          : `<div class="empty">
+               <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></div>
+               <h2>Sin resultados</h2>
+               <p>Prueba con otro nombre o cambia el filtro de estado.</p>
+               <button type="button" class="btn btn--secondary" onclick="limpiarFiltros()">Quitar filtros</button>
+             </div>`;
+        return;
       }
 
-      guardarCitasEnStorage(); // Guardar en localStorage
-      pintarCards();
-      this.reset();
-      limpiarTodosLosErrores();
-      document.getElementById("indiceEditar").value = "";
-      bootstrap.Modal.getInstance(document.getElementById("registroModal")).hide();
-    });
-
-    function editar(i) {
-      limpiarTodosLosErrores();
-      const cita = citas[i];
-      document.getElementById("nombremascota").value = cita.nombreMascota;
-      document.getElementById("nombrePropietario").value = cita.nombrePropietario;
-      document.getElementById("telefono").value = cita.telefono;
-      document.getElementById("fechaCita").value = cita.fechaCita;
-      document.getElementById("horaCita").value = cita.horaCita;
-      document.getElementById("tipoMascota").value = cita.tipoMascota;
-      document.getElementById("sintomas").value = cita.sintomas;
-      document.getElementById("estado").value = cita.estado;
-      document.getElementById("indiceEditar").value = i;
-      new bootstrap.Modal(document.getElementById("registroModal")).show();
+      contenedor.innerHTML = filtradas.map((cita) => tarjetaHTML(cita, citas.indexOf(cita))).join("");
     }
 
+    function limpiarFiltros() {
+      filtroActual = "";
+      $("busqueda").value = "";
+      $("searchWrap").classList.remove("has-value");
+      pintarCards();
+    }
+
+    /* ---------- Diálogo de cita ---------- */
+    const dlgRegistro = $("registroModal");
+    const dlgEliminar = $("confirmarEliminarModal");
+
+    function resetearFormulario() {
+      $("formularioCita").reset();
+      $("indiceEditar").value = "";
+      $("tituloModal").textContent = "Nueva cita";
+      limpiarTodosLosErrores();
+      actualizarTipoOtro();
+      actualizarContador();
+      actualizarHorasOcupadas();
+    }
+
+    // fechaPrevia (opcional): se usa al agendar desde el calendario
+    function abrirNuevaCita(fechaPrevia) {
+      cerrarDialogosDeConsulta();
+      resetearFormulario();
+      if (typeof fechaPrevia === 'string') {
+        $("fechaCita").value = fechaPrevia;
+        actualizarHorasOcupadas();
+      }
+      dlgRegistro.showModal();
+      $("nombremascota").focus();
+    }
+
+    function cerrarDialogosDeConsulta() {
+      if ($('fichaModal').open) $('fichaModal').close();
+      if ($('diaModal').open) $('diaModal').close();
+    }
+
+    function cerrarRegistro() {
+      dlgRegistro.close();
+    }
+
+    // Se limpia el formulario siempre que el diálogo se cierre (botón, X o tecla Esc)
+    dlgRegistro.addEventListener("close", resetearFormulario);
+
+    function editar(i) {
+      cerrarDialogosDeConsulta();
+      resetearFormulario();
+      const cita = citas[i];
+      $("nombremascota").value = cita.nombreMascota;
+      $("nombrePropietario").value = cita.nombrePropietario;
+      $("telefono").value = cita.telefono;
+      $("fechaCita").value = cita.fechaCita;
+      $("horaCita").value = cita.horaCita;
+      $("tipoMascota").value = cita.tipoMascota;
+      actualizarTipoOtro();
+      $("tipoOtro").value = cita.tipoOtro || "";
+      $("sintomas").value = cita.sintomas;
+      $("estado").value = cita.estado;
+      $("indiceEditar").value = i;
+      $("tituloModal").textContent = "Editar cita";
+      actualizarContador();
+      actualizarHorasOcupadas();
+      dlgRegistro.showModal();
+    }
+
+    $("formularioCita").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const indice = $("indiceEditar").value;
+      const nuevaCita = {
+        nombreMascota: $("nombremascota").value.trim(),
+        nombrePropietario: $("nombrePropietario").value.trim(),
+        telefono: $("telefono").value.trim(),
+        fechaCita: $("fechaCita").value,
+        horaCita: $("horaCita").value,
+        tipoMascota: $("tipoMascota").value,
+        tipoOtro: $("tipoOtro").value.trim(),
+        sintomas: $("sintomas").value.trim(),
+        estado: $("estado").value,
+      };
+
+      if (!validarDatos(nuevaCita, indice)) {
+        const primero = this.querySelector('.is-invalid');
+        if (primero) primero.focus();
+        return;
+      }
+
+      const esEdicion = indice !== "";
+      if (esEdicion) citas[parseInt(indice)] = nuevaCita;
+      else citas.push(nuevaCita);
+
+      guardarCitasEnStorage();
+      pintarCards();
+      dlgRegistro.close();
+      mostrarAviso(esEdicion ? 'Cita actualizada' : 'Cita agendada correctamente');
+    });
+
+    function marcarTerminada(i) {
+      citas[i].estado = 'Terminada';
+      guardarCitasEnStorage();
+      pintarCards();
+      mostrarAviso('Cita marcada como terminada');
+    }
+
+    /* ---------- Vista: lista / calendario ---------- */
+    let vistaActual = 'lista';
+    try { vistaActual = localStorage.getItem('vistaCitas') === 'calendario' ? 'calendario' : 'lista'; } catch (e) { }
+
+    function aplicarVista() {
+      const cal = vistaActual === 'calendario';
+      $('contenedorTarjetas').hidden = cal;
+      $('vistaCalendario').hidden = !cal;
+      document.querySelectorAll('.segmented__btn').forEach((b) => {
+        const activo = b.dataset.vista === vistaActual;
+        b.classList.toggle('is-active', activo);
+        b.setAttribute('aria-pressed', activo);
+      });
+    }
+
+    document.querySelectorAll('.segmented__btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        vistaActual = b.dataset.vista;
+        try { localStorage.setItem('vistaCitas', vistaActual); } catch (e) { }
+        aplicarVista();
+      });
+    });
+
+    /* ---------- Calendario mensual ---------- */
+    const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const isoDe = (fecha) => `${fecha.getFullYear()}-${pad2(fecha.getMonth() + 1)}-${pad2(fecha.getDate())}`;
+
+    const ahora = new Date();
+    let mesVisible = { anio: ahora.getFullYear(), mes: ahora.getMonth() };
+
+    function cambiarMes(delta) {
+      const d = new Date(mesVisible.anio, mesVisible.mes + delta, 1);
+      mesVisible = { anio: d.getFullYear(), mes: d.getMonth() };
+      pintarCalendario(citasFiltradas());
+    }
+
+    function irAHoy() {
+      const d = new Date();
+      mesVisible = { anio: d.getFullYear(), mes: d.getMonth() };
+      pintarCalendario(citasFiltradas());
+    }
+
+    const MAX_CHIPS = 3;
+
+    function pintarCalendario(lista) {
+      const { anio, mes } = mesVisible;
+      $('calTitulo').textContent = `${MESES_LARGOS[mes]} de ${anio}`;
+
+      const offset = (new Date(anio, mes, 1).getDay() + 6) % 7; // semana desde lunes
+      const diasMes = new Date(anio, mes + 1, 0).getDate();
+      const totalCeldas = Math.ceil((offset + diasMes) / 7) * 7;
+      const hoyIso = isoDe(new Date());
+
+      const porDia = {};
+      lista.forEach((c) => { (porDia[c.fechaCita] = porDia[c.fechaCita] || []).push(c); });
+
+      let html = '';
+      for (let i = 0; i < totalCeldas; i++) {
+        const f = new Date(anio, mes, 1 - offset + i);
+        const iso = isoDe(f);
+        const delDia = porDia[iso] || [];
+        const n = delDia.length;
+        const etiqueta = `${f.getDate()} de ${MESES_LARGOS[f.getMonth()]}${n ? `, ${n} ${n === 1 ? 'cita' : 'citas'}` : ', sin citas'}`;
+
+        const chips = delDia.slice(0, MAX_CHIPS).map((c) =>
+          `<button type="button" class="cal__chip cal__chip--${c.estado.toLowerCase()}" data-cita="${citas.indexOf(c)}"
+             title="${escaparHTML(c.nombreMascota)} · ${escaparHTML(c.estado)}"><b>${formatearHora(c.horaCita)}</b>${escaparHTML(c.nombreMascota)}</button>`).join('');
+        const mas = n > MAX_CHIPS
+          ? `<button type="button" class="cal__more" data-dia="${iso}">+${n - MAX_CHIPS} más</button>` : '';
+
+        html += `
+        <div class="cal__cell ${f.getMonth() !== mes ? 'is-outside' : ''} ${iso === hoyIso ? 'is-today' : ''}" data-fecha="${iso}">
+          <button type="button" class="cal__num" data-dia="${iso}" aria-label="${etiqueta}">${f.getDate()}</button>
+          ${n ? `<span class="cal__count" aria-hidden="true">${n}</span>` : ''}
+          <div class="cal__events">${chips}${mas}</div>
+        </div>`;
+      }
+      $('calGrid').innerHTML = html;
+    }
+
+    // Un solo manejador para todo el calendario: cita, día o celda
+    $('calGrid').addEventListener('click', (e) => {
+      const cita = e.target.closest('[data-cita]');
+      if (cita) return verFicha(Number(cita.dataset.cita));
+      const dia = e.target.closest('[data-dia]');
+      if (dia) return abrirDia(dia.dataset.dia);
+      const celda = e.target.closest('.cal__cell');
+      if (celda) abrirDia(celda.dataset.fecha);
+    });
+
+    /* ---------- Citas del día ---------- */
+    let diaActual = null;
+
+    function abrirDia(iso) {
+      diaActual = iso;
+      renderDia();
+      $('diaModal').showModal();
+    }
+
+    function renderDia() {
+      if (!diaActual) return;
+      const [a, m, d] = diaActual.split('-').map(Number);
+      const fecha = new Date(a, m - 1, d);
+      const lista = citasFiltradas().filter((c) => c.fechaCita === diaActual);
+
+      $('diaTitulo').textContent = fecha.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+      $('diaSubtitulo').textContent = lista.length
+        ? `${lista.length} ${lista.length === 1 ? 'cita programada' : 'citas programadas'}`
+        : 'Sin citas programadas';
+
+      $('diaCuerpo').innerHTML = lista.length
+        ? `<ul class="day-list">${lista.map((c) => `
+            <li><button type="button" class="day-item" data-cita="${citas.indexOf(c)}">
+              <span class="day-item__time">${formatearHora(c.horaCita)}</span>
+              ${avatarHTML(c.tipoMascota, 'avatar--sm')}
+              <span class="day-item__who">
+                <span class="day-item__name">${escaparHTML(c.nombreMascota)}</span><br>
+                <span class="day-item__sub">${escaparHTML(c.nombrePropietario)} · ${escaparHTML(c.telefono)}</span>
+              </span>
+              <span class="badge badge--${c.estado.toLowerCase()}">${escaparHTML(c.estado)}</span>
+            </button></li>`).join('')}</ul>
+           ${(filtroActual || $('busqueda').value.trim()) ? '<p class="day-note">Se muestran las citas que cumplen el filtro o la búsqueda actual.</p>' : ''}`
+        : `<div class="empty" style="border:0;padding:1.5rem 0">
+             <div class="empty__icon">${PATA_SVG}</div>
+             <h2>Día libre</h2><p style="margin:0 auto">No hay citas programadas para este día.</p>
+           </div>`;
+
+      // Solo se puede agendar desde mañana (misma regla que el formulario)
+      const manana = new Date(); manana.setHours(0, 0, 0, 0); manana.setDate(manana.getDate() + 1);
+      const puedeAgendar = fecha >= manana;
+      $('diaAgendar').hidden = !puedeAgendar;
+      $('diaAgendar').onclick = () => abrirNuevaCita(diaActual);
+    }
+
+    $('diaCuerpo').addEventListener('click', (e) => {
+      const item = e.target.closest('[data-cita]');
+      if (item) verFicha(Number(item.dataset.cita));
+    });
+
+    /* ---------- Ficha de la cita (paciente + teléfono del propietario) ---------- */
+    function verFicha(i) {
+      const c = citas[i];
+      const tipo = c.tipoMascota === 'Otro' && c.tipoOtro ? `Otro: ${c.tipoOtro}` : c.tipoMascota;
+      const tel = escaparHTML(c.telefono);
+
+      $('fichaCuerpo').innerHTML = `
+        <div class="detail__head">
+          ${avatarHTML(c.tipoMascota, 'avatar--lg')}
+          <div>
+            <h3 class="detail__title">${escaparHTML(c.nombreMascota)}</h3>
+            <div class="detail__sub">${escaparHTML(tipo)}</div>
+          </div>
+          <span class="badge badge--${c.estado.toLowerCase()}">${escaparHTML(c.estado)}</span>
+        </div>
+
+        <div class="detail__metrics" style="grid-template-columns:1fr 1fr">
+          <div class="metric"><span class="metric__label">Fecha</span><span class="metric__value">${formatearFecha(c.fechaCita)}</span></div>
+          <div class="metric"><span class="metric__label">Hora</span><span class="metric__value">${formatearHora(c.horaCita)}</span></div>
+        </div>
+
+        <dl class="detail__meta">
+          <div><dt>Propietario</dt><dd>${escaparHTML(c.nombrePropietario)}</dd></div>
+          <div><dt>Teléfono</dt><dd class="detail__phone"><a href="tel:${tel}">${tel}</a></dd></div>
+        </dl>
+
+        <div class="detail__section"><h3>Motivo de consulta</h3><p>${escaparHTML(c.sintomas)}</p></div>`;
+
+      $('fichaEditar').onclick = () => editar(i);
+      $('fichaTerminar').hidden = c.estado !== 'Abierta';
+      $('fichaTerminar').onclick = () => { marcarTerminada(i); $('fichaModal').close(); };
+      $('fichaModal').showModal();
+    }
+
+    ['fichaModal', 'diaModal'].forEach((id) => {
+      const d = $(id);
+      d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+    });
+
+    /* ---------- Eliminar ---------- */
     let indexEliminar = null;
     function prepararEliminar(i) {
       indexEliminar = i;
-      new bootstrap.Modal(document.getElementById("confirmarEliminarModal")).show();
+      const c = citas[i];
+      $('textoEliminar').textContent =
+        `Se eliminará la cita de ${c.nombreMascota} (${formatearFecha(c.fechaCita)}). Esta acción no se puede deshacer.`;
+      dlgEliminar.showModal();
     }
 
     function eliminarConfirmado() {
       if (indexEliminar !== null) {
         citas.splice(indexEliminar, 1);
-        guardarCitasEnStorage(); // Guardar en localStorage después de eliminar
+        guardarCitasEnStorage();
         pintarCards();
         indexEliminar = null;
-        bootstrap.Modal.getInstance(document.getElementById("confirmarEliminarModal")).hide();
+        dlgEliminar.close();
+        mostrarAviso('Cita eliminada');
       }
     }
 
-    document.getElementById("filtroEstado").addEventListener("change", () => {
-      pintarCards(
-        document.getElementById("filtroEstado").value,
-        document.getElementById("busqueda").value
-      );
+    // El diálogo de confirmación sí se cierra al hacer clic fuera
+    dlgEliminar.addEventListener("click", (e) => { if (e.target === dlgEliminar) dlgEliminar.close(); });
+
+    /* ---------- Filtros y búsqueda ---------- */
+    document.querySelectorAll('.kpi').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filtroActual = btn.dataset.filtro;
+        pintarCards();
+      });
     });
 
-    document.getElementById("busqueda").addEventListener("input", () => {
-      pintarCards(
-        document.getElementById("filtroEstado").value,
-        document.getElementById("busqueda").value
-      );
+    const inputBusqueda = $("busqueda");
+    inputBusqueda.addEventListener("input", () => {
+      $("searchWrap").classList.toggle("has-value", inputBusqueda.value !== "");
+      pintarCards();
     });
 
-
-    document.getElementById("registroModal").addEventListener("show.bs.modal", function () {
-      limpiarTodosLosErrores();
-
-      // Si no hay índice de edición, es una nueva cita - limpiar formulario
-      if (!document.getElementById("indiceEditar").value) {
-        document.getElementById("formularioCita").reset();
-        document.getElementById("indiceEditar").value = "";
-      }
+    $("limpiarBusqueda").addEventListener("click", () => {
+      inputBusqueda.value = "";
+      $("searchWrap").classList.remove("has-value");
+      pintarCards();
+      inputBusqueda.focus();
     });
 
-    // Limpiar formulario cuando se cierre el modal
-    document.getElementById("registroModal").addEventListener("hidden.bs.modal", function () {
-      document.getElementById("formularioCita").reset();
-      document.getElementById("indiceEditar").value = "";
-      limpiarTodosLosErrores();
+    /* ---------- Formulario: ayudas ---------- */
+    function actualizarContador() {
+      const area = $("sintomas");
+      const cont = $("contadorSintomas");
+      cont.textContent = `${area.value.length} / 400`;
+      cont.classList.toggle("is-near", area.value.length >= 360);
+    }
+    $("sintomas").addEventListener("input", actualizarContador);
+
+    $("tipoMascota").addEventListener("change", () => {
+      actualizarTipoOtro();
+      if ($("tipoMascota").value === 'Otro') $("tipoOtro").focus();
     });
 
+    // El teléfono solo admite dígitos
+    $("telefono").addEventListener("input", function () {
+      this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    });
 
+    // Al elegir fecha se muestran las horas ya ocupadas; al cambiar fecha/hora/estado se limpia el aviso de choque
+    $("fechaCita").addEventListener("change", () => { actualizarHorasOcupadas(); limpiarError('horaCita'); });
+    $("fechaCita").addEventListener("input", actualizarHorasOcupadas);
+
+    // Al corregir un campo, su error desaparece
+    CAMPOS_VALIDABLES.forEach((campo) => {
+      const el = $(campo);
+      el.addEventListener("input", () => limpiarError(campo));
+      el.addEventListener("change", () => limpiarError(campo));
+    });
+
+    /* ---------- Inicio ---------- */
     document.addEventListener('DOMContentLoaded', function () {
-      // Cargar citas al iniciar la página
       cargarCitasDesdeStorage();
 
-      const fechaInput = document.getElementById('fechaCita');
       const manana = new Date();
       manana.setDate(manana.getDate() + 1);
-      fechaInput.min = manana.toISOString().split('T')[0];
+      $('fechaCita').min = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, '0')}-${String(manana.getDate()).padStart(2, '0')}`;
 
-      // Pintar las citas cargadas
+      $('fechaHoy').textContent =
+        new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
       pintarCards();
     });
   </script>
